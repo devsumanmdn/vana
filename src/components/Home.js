@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import PropTypes from "prop-types";
 import path from "path";
 import makeStyles from "@material-ui/styles/makeStyles";
+import { FixedSizeList as List, areEqual } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 import uuid from "uuid";
-import { connect } from "react-redux";
-import fs from "fs";
 import * as mm from "music-metadata";
+import { connect } from "react-redux";
+
+import fs from "fs";
 import { remote } from "electron";
 
 import { addSongs as addSongsAction } from "../redux/songs/songsActions";
@@ -57,6 +60,13 @@ const useStyles = makeStyles({
   }
 });
 
+const Row = memo(({ data, index, style }) => {
+  const metaData = data[index];
+  return metaData ? (
+    <SongListItem style={style} key={metaData.id} metaData={metaData} />
+  ) : null;
+}, areEqual);
+
 const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
   const [folderPath, setFolderPath] = useState("");
 
@@ -75,33 +85,35 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
             readTree(path.join(entry, file));
           });
         });
-      } else {
-        const file = await readFile(entry);
-        if (file) {
-          const {
-            common: { album, artist, picture },
-            format: { codec }
-          } = file;
-          let {
-            common: { title }
-          } = file;
+      } else if (
+        ["mp3", "flac", "ogg", "webm"].includes(entry.split(".").slice(-1)[0])
+      ) {
+        // const file = await readFile(entry);
+        // if (file) {
+        //   const {
+        //     common: { album, artist, picture },
+        //     format: { codec }
+        //   } = file;
+        //   let {
+        //     common: { title }
+        //   } = file;
 
-          if (!title) {
-            [title] = entry.split("/").slice(-1);
+        //   if (!title) {
+        //     [title] = entry.split("/").slice(-1);
+        //   }
+
+        addSongs([
+          {
+            // albumArt: picture && picture[0],
+            // codec,
+            // title,
+            // artist,
+            // album,
+            id: uuid(),
+            location: entry
           }
-
-          addSongs([
-            {
-              albumArt: picture && picture[0],
-              codec,
-              title,
-              artist,
-              album,
-              id: uuid(),
-              location: entry
-            }
-          ]);
-        }
+        ]);
+        // }
       }
     });
   };
@@ -140,15 +152,21 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
           </button>
         </div>
         <div className={classes.songsList}>
-          {Object.values(allSongs).map(metaData => (
-            <SongListItem
-              playing={metaData.id === activeSongId && playing}
-              key={metaData.id}
-              metaData={metaData}
-            />
-          ))}
+          <AutoSizer>
+            {({ height, width }) => (
+              <List
+                height={height}
+                itemCount={Object.keys(allSongs).length}
+                itemData={Object.values(allSongs)}
+                itemSize={80}
+                width={width}
+              >
+                {Row}
+              </List>
+            )}
+          </AutoSizer>
         </div>
-        <Player song={activeSong} playerState={player} />
+        <Player activeSong={activeSong} playerState={player} />
       </div>
     </div>
   );
@@ -156,7 +174,7 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
 
 Home.propTypes = {
   songs: PropTypes.shape({
-    all: PropTypes.arrayOf(PropTypes.shape({})).isRequired
+    all: PropTypes.objectOf(PropTypes.shape({})).isRequired
   }).isRequired,
   player: PropTypes.shape({
     activeSongId: PropTypes.string,

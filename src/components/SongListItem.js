@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
 import makeStyles from "@material-ui/styles/makeStyles";
 import PlayArrowRounded from "@material-ui/icons/PlayArrowRounded";
 import PauseRounded from "@material-ui/icons/PauseRounded";
+import * as mm from "music-metadata";
+import { connect } from "react-redux";
 
 import {
   playSong as playSongAction,
@@ -48,12 +49,21 @@ const useStyles = makeStyles({
   }
 });
 
-function SongListItem({ metaData, playing, playSong, pauseSong }) {
-  const { title } = metaData;
+function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
+  const [songInfo, setSongInfo] = useState(null);
+
+  useState(() => {
+    mm.parseFile(metaData.location).then(info => {
+      setSongInfo(info);
+    });
+  }, [metaData.location]);
 
   const classes = useStyles();
 
-  const albumArt = metaData && metaData.albumArt ? metaData.albumArt : false;
+  const albumArt =
+    songInfo && songInfo.common.picture && songInfo.common.picture[0]
+      ? songInfo.common.picture[0]
+      : false;
 
   const albumArtDataURL = albumArt
     ? `data:image/jpeg;base64,${albumArt.data.toString("base64")}`
@@ -67,11 +77,12 @@ function SongListItem({ metaData, playing, playSong, pauseSong }) {
     }
   };
 
-  return (
+  return songInfo ? (
     <div
       role={"presentation"}
       onClick={handlePlayPause}
       className={classes.root}
+      {...rest}
     >
       <img
         className={classes.albumArt}
@@ -81,10 +92,12 @@ function SongListItem({ metaData, playing, playSong, pauseSong }) {
       <button type={"button"} className={classes.playBtn}>
         {playing ? <PauseRounded /> : <PlayArrowRounded />}
       </button>
-      <p>{title}</p>
+      <p>{songInfo.common.title}</p>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio src={metaData.location} />
     </div>
+  ) : (
+    <div className={classes.root} {...rest} />
   );
 }
 
@@ -105,7 +118,11 @@ const mapDispatchToProps = {
   pauseSong: pauseSongAction
 };
 
+const mapStateToProps = ({ player }, ownProps) => ({
+  playing: ownProps.metaData.id === player.activeSongId && player.playing
+});
+
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(SongListItem);
