@@ -12,6 +12,7 @@ import VolumeOff from "@material-ui/icons/VolumeOff";
 import VolumeDown from "@material-ui/icons/VolumeDown";
 import VolumeMute from "@material-ui/icons/VolumeMute";
 import VolumeUp from "@material-ui/icons/VolumeUp";
+import * as mm from "music-metadata";
 import moment from "moment";
 import momentDurationFormatSetup from "moment-duration-format";
 import { connect } from "react-redux";
@@ -120,7 +121,7 @@ const useStyle = makeStyles({
 });
 
 const Player = ({
-  song,
+  activeSong,
   playerState,
   playSong,
   pauseSong,
@@ -129,10 +130,19 @@ const Player = ({
 }) => {
   const classes = useStyle();
   const player = useRef(null);
+  const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
   const [playedDuration, setPlayedDuration] = useState();
   const [expandedView, setExpadedView] = useState(false);
   const [volume, setVolume] = React.useState(30);
+
+  useEffect(() => {
+    if (activeSong && activeSong.location) {
+      mm.parseFile(activeSong.location).then(metaData => {
+        setSongInfo(metaData);
+      });
+    }
+  }, [activeSong]);
 
   const handleChange = (event, newVolume) => {
     if (player.current) {
@@ -156,17 +166,24 @@ const Player = ({
     }
   }, [playerState.playing]);
 
+  const pause = () => {
+    if (player.current) {
+      player.current.pause();
+    }
+  };
+
   const play = () => {
     if (player.current !== null) {
       player.current.pause();
     }
 
-    fs.readFile(song.location, (err, data) => {
-      const songDataURL = song
-        ? `data:audio/${song.codec.toLowerCase()};base64,${data.toString(
-            "base64"
-          )}`
-        : null;
+    fs.readFile(activeSong.location, (err, data) => {
+      const songDataURL =
+        songInfo && songInfo.format
+          ? `data:audio/${songInfo.format.codec.toLowerCase()};base64,${data.toString(
+              "base64"
+            )}`
+          : null;
       player.current = new Audio(songDataURL);
       player.current.addEventListener("loadeddata", () => {
         setTotalDuration(player.current.duration);
@@ -193,14 +210,18 @@ const Player = ({
   };
 
   useEffect(() => {
-    if (song) {
+    if (songInfo) {
       play();
     }
-  }, [song]);
+    return pause;
+  }, [songInfo]);
 
   const { playing } = playerState;
 
-  const albumArt = song && song.albumArt ? song.albumArt : false;
+  const albumArt =
+    songInfo && songInfo.common.picture && songInfo.common.picture[0]
+      ? songInfo.common.picture[0]
+      : false;
 
   const albumArtDataURL = albumArt
     ? `data:image/jpeg;base64,${albumArt.data.toString("base64")}`
@@ -208,7 +229,7 @@ const Player = ({
 
   return (
     <div className={clsx(classes.root, { expandedView })}>
-      {song ? (
+      {songInfo ? (
         <img
           role={"presentation"}
           onClick={() => setExpadedView(!expandedView)}
@@ -275,7 +296,7 @@ Player.propTypes = {
   playerState: PropTypes.shape({
     playing: PropTypes.bool
   }).isRequired,
-  song: PropTypes.shape({
+  activeSong: PropTypes.shape({
     codec: PropTypes.string,
     title: PropTypes.string,
     location: PropTypes.string,
@@ -288,7 +309,7 @@ Player.propTypes = {
 };
 
 Player.defaultProps = {
-  song: null
+  activeSong: null
 };
 
 const mapDispatchToProps = {
