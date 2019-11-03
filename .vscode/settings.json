@@ -1,0 +1,44 @@
+{
+	"prettier.singleQuote": true,
+	"editor.wordWrap": "off",
+	"editor.detectIndentation": true,
+	"editor.tabSize": 2,
+	// Enable per-language
+
+	// eslint prettier
+	"[javascript]": {
+			"editor.formatOnSave": true,
+			"editor.defaultFormatter": "esbenp.prettier-vscode",
+	},
+	"javascript.format.enable": true,
+	"prettier.eslintIntegration": true,
+	"eslint.alwaysShowStatus": true,
+
+
+	"[json]": {
+			"editor.quickSuggestions": {
+					"strings": true
+			}
+	},
+	"[markdown]": {
+			"editor.wordWrap": "on",
+			"editor.quickSuggestions": false
+	},
+	"search.exclude": {
+			"**/node_modules": true,
+	},
+	"gitlens.advanced.messages": {
+			"suppressCommitHasNoPreviousCommitWarning": false,
+			"suppressCommitNotFoundWarning": false,
+			"suppressFileNotUnderSourceControlWarning": false,
+			"suppressGitVersionWarning": false,
+			"suppressLineUncommittedWarning": false,
+			"suppressNoRepositoryWarning": false,
+			"suppressResultsExplorerNotice": true,
+			"suppressShowKeyBindingsNotice": true,
+			"suppressUpdateNotice": true,
+			"suppressWelcomeNotice": false
+	},
+	"gitlens.keymap": "alternate",
+	"git.autofetch": true,
+}
