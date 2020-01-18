@@ -1,5 +1,4 @@
 {
-	"prettier.singleQuote": true,
 	"editor.wordWrap": "off",
 	"editor.detectIndentation": true,
 	"editor.tabSize": 2,
@@ -11,7 +10,6 @@
 			"editor.defaultFormatter": "esbenp.prettier-vscode",
 	},
 	"javascript.format.enable": true,
-	"prettier.eslintIntegration": true,
 	"eslint.alwaysShowStatus": true,
 
 

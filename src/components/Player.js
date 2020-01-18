@@ -162,6 +162,7 @@ const Player = ({
 
   const handleSeek = (event, newValue) => {
     if (player.current) {
+      pauseSong();
       player.current.currentTime = totalDuration * (newValue / 100);
     }
   };
@@ -291,6 +292,7 @@ const Player = ({
             value={(playedDuration / totalDuration) * 100}
             aria-labelledby={'continuous-slider'}
             onChange={handleSeek}
+            onChangeCommitted={playSong}
           />
           <span>
             {moment.duration(playedDuration, 'seconds').format('mm:ss', {
@@ -340,7 +342,4 @@ const mapDispatchToProps = {
   playPrevSong: playPrevSongAction
 };
 
-export default connect(
-  null,
-  mapDispatchToProps
-)(Player);
+export default connect(null, mapDispatchToProps)(Player);
