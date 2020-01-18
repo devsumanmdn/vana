@@ -1,21 +1,22 @@
-import React, { useState, memo } from "react";
-import PropTypes from "prop-types";
-import path from "path";
-import makeStyles from "@material-ui/styles/makeStyles";
-import { FixedSizeList as List, areEqual } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
-import uuid from "uuid";
-import * as mm from "music-metadata";
-import { connect } from "react-redux";
+import React, { useState, memo } from 'react';
+import PropTypes from 'prop-types';
+import path from 'path';
+import makeStyles from '@material-ui/styles/makeStyles';
+import { FixedSizeList as List, areEqual } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import uuid from 'uuid';
+import { Button, Icon } from '@material-ui/core';
+import * as mm from 'music-metadata';
+import { connect } from 'react-redux';
 
-import fs from "fs";
-import { remote } from "electron";
+import fs from 'fs';
+import { remote } from 'electron';
 
-import { addSongs as addSongsAction } from "../redux/songs/songsActions";
-import { addSongsToQueue as addSongsToQueueAction } from "../redux/player/playerActions";
-import SongListItem from "./SongListItem";
-import Player from "./Player";
-import Sidebar from "./Sidebar";
+import { addSongs as addSongsAction } from '../redux/songs/songsActions';
+import { addSongsToQueue as addSongsToQueueAction } from '../redux/player/playerActions';
+import SongListItem from './SongListItem';
+import Player from './Player';
+import Sidebar from './Sidebar';
 
 const readFile = filePath => {
   return mm.parseFile(filePath).catch(err => {
@@ -24,39 +25,46 @@ const readFile = filePath => {
 };
 
 const useStyles = makeStyles({
-  "@global": {
+  '@global': {
     body: {
-      fontFamily: "Sans Serif",
+      fontFamily: 'Sans Serif',
       margin: 0,
       padding: 0
     },
-    "*::-webkit-scrollbar": {
+    '*::-webkit-scrollbar': {
       width: 8
     },
-    "*::-webkit-scrollbar-track": {
-      boxShadow: "inset 0 0 6px rgba(0,0,0,0.3)"
+    '*::-webkit-scrollbar-track': {
+      boxShadow: 'inset 0 0 6px rgba(0,0,0,0.3)'
     },
 
-    "*::-webkit-scrollbar-thumb": {
-      backgroundColor: "#444",
-      outline: "1px solid slategrey",
+    '*::-webkit-scrollbar-thumb': {
+      backgroundColor: '#444',
+      outline: '1px solid slategrey',
       borderRadius: 4
     }
   },
   container: {
-    display: "flex",
-    backgroundColor: "#223",
-    color: "white",
-    height: "100vh"
+    display: 'flex',
+    backgroundColor: '#000',
+    color: 'white',
+    height: '100vh'
   },
   mainView: {
     flexGrow: 1,
-    display: "flex",
-    flexDirection: "column"
+    display: 'flex',
+    flexDirection: 'column'
   },
   songsList: {
     flexGrow: 1,
-    overflow: "auto"
+    overflow: 'auto'
+  },
+  buttonContainer: {
+    display: 'flex',
+    '& > button': {
+      margin: '10px 5px',
+      color: '#FFFFFF'
+    }
   }
 });
 
@@ -68,7 +76,7 @@ const Row = memo(({ data, index, style }) => {
 }, areEqual);
 
 const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
-  const [folderPath, setFolderPath] = useState("");
+  const [folderPath, setFolderPath] = useState('');
 
   const { all: allSongs } = songs;
   const { activeSongId, playing } = player;
@@ -86,7 +94,7 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
           });
         });
       } else if (
-        ["mp3", "flac", "ogg", "webm"].includes(entry.split(".").slice(-1)[0])
+        ['mp3', 'flac', 'ogg', 'webm'].includes(entry.split('.').slice(-1)[0])
       ) {
         // const file = await readFile(entry);
         // if (file) {
@@ -120,7 +128,7 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
 
   const chooseFolderDialog = async () => {
     const { canceled, filePaths } = await remote.dialog.showOpenDialog({
-      properties: ["openDirectory"]
+      properties: ['openDirectory']
     });
 
     if (!canceled) {
@@ -138,18 +146,13 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
 
   return (
     <div className={classes.container}>
-      <Sidebar />
+      {/*<Sidebar chooseFolderDialog={chooseFolderDialog} />*/}
       <div className={classes.mainView}>
-        <div>
-          <button type={"button"} onClick={chooseFolderDialog}>
-            Choose folders
-          </button>
-          <p>{folderPath}</p>
-        </div>
-        <div>
-          <button type={"button"} onClick={playAll}>
-            Play All
-          </button>
+        <div className={classes.buttonContainer}>
+          <Button onClick={chooseFolderDialog}>Add Songs</Button>
+          <Button onClick={playAll}>
+            <Icon>play</Icon>Play All
+          </Button>
         </div>
         <div className={classes.songsList}>
           <AutoSizer>
@@ -194,7 +197,4 @@ const mapDispatchToProps = {
   addSongsToQueue: addSongsToQueueAction
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
