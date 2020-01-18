@@ -31,7 +31,7 @@ import {
 const Slider = withStyles({
   root: {
     color: '#52af77',
-    height: 8
+    height: 4
   },
   thumb: {
     height: 15,
@@ -70,17 +70,75 @@ const useStyle = makeStyles({
     alignItems: 'center',
     padding: '0 20px',
     transitionDuration: '1s',
+
     '&.expandedView': {
-      width: '100vw',
       height: '100vh',
-      top: 0
+      width: '100vw',
+      padding: '10px 20px',
+      top: 0,
+      left: 0,
+      maxHeight: 'unset',
+      flexDirection: 'column',
+      position: 'fixed',
+
+      '& $albumArt': {
+        height: '90vw',
+        width: '90vw',
+        maxWidth: '80vh',
+        maxHeight: '80vh',
+        margin: '20px'
+      },
+
+      '& $volumeContainer': {
+        display: 'none'
+      },
+
+      '& $songInfo': {
+        marginTop: 10,
+        '& > p': {
+          fontSize: '18px',
+          margin: '0 10px'
+        }
+      },
+      '& $playBtn': {
+        height: 50,
+        width: 50,
+        marginRight: 20,
+        padding: 10,
+        '& > svg': {
+          fontSize: 28
+        }
+      }
     }
+  },
+  background: {
+    position: 'fixed',
+    zIndex: -1,
+    height: '100vh',
+    width: '100vw',
+    backgroundPosition: 'center',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    filter: 'blur(1.25rem) brightness(0.5)',
+    transition: 'background-image 1s .3s',
+    willChange: 'background-image'
   },
   albumArt: {
     height: 50,
     width: 50,
     backgroundColor: '#222',
-    marginRight: 20
+    marginRight: 20,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'contain',
+    backgroundPosition: 'center',
+    backgroundColor: 'transparent',
+    transition: 'background-image 0.6s .2s',
+    willChange: 'background-image',
+    cursor: 'nesw-resize'
+  },
+  songNavigation: {
+    display: 'flex',
+    margin: '20px 10px'
   },
   playBtn: {
     backgroundColor: 'transparent',
@@ -109,13 +167,24 @@ const useStyle = makeStyles({
   infoContainer: {
     flexGrow: 1,
     flexDirection: 'column',
-    '& > div': {
-      display: 'flex'
+    alignSelf: 'stretch',
+    marginTop: 10,
+    '& $songInfo, & > div': {
+      display: 'flex',
+      alignItems: 'center',
+      '& > *': {
+        whiteSpace: 'nowrap'
+      }
     }
   },
   songInfo: {
+    flexGrow: 1,
     '& > p': {
-      margin: 0
+      fontSize: '18px',
+      margin: '0 10px',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipcis'
     }
   },
   songPlaybackProgress: {
@@ -125,8 +194,21 @@ const useStyle = makeStyles({
     }
   },
   progessSlider: {},
+  volumeContainer: {
+    marginRight: 20,
+    '& > :not(last-child)': {
+      marginRight: 5
+    }
+  },
   volumeSlider: {
     width: 100
+  },
+  separator: {
+    height: 6,
+    width: 6,
+    borderRadius: '50%',
+    backgroundColor: '#fff2',
+    margin: '4px 8px'
   }
 });
 
@@ -143,7 +225,7 @@ const Player = ({
   const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
   const [playedDuration, setPlayedDuration] = useState();
-  const [expandedView, setExpadedView] = useState(false);
+  const [expandedView, setExpadedView] = useState(true);
   const [volume, setVolume] = React.useState(30);
 
   useEffect(() => {
@@ -240,46 +322,66 @@ const Player = ({
 
   return (
     <div className={clsx(classes.root, { expandedView })}>
+      <div
+        className={classes.background}
+        style={{ backgroundImage: `url(${albumArtDataURL}` }}
+      ></div>
       {songInfo ? (
-        <img
+        <div
           role={'presentation'}
           onClick={() => setExpadedView(!expandedView)}
           className={classes.albumArt}
-          src={albumArtDataURL}
+          style={{ backgroundImage: `url(${albumArtDataURL}` }}
           alt={'albumArt'}
         />
       ) : (
-        <div className={classes.albumArt} style={{ background: '#000' }} />
+        <div
+          onClick={() => setExpadedView(!expandedView)}
+          className={classes.albumArt}
+          style={{ background: '#000' }}
+        />
       )}
-      <button
-        type={'button'}
-        onClick={playPrevSong}
-        className={classes.playBtn}
-      >
-        <PlayPreviousIcon />
-      </button>
-      <button
-        type={'button'}
-        onClick={handlePlayPause}
-        className={classes.playBtn}
-      >
-        {playing ? <PauseIcon /> : <PlayIcon />}
-      </button>
-      <button
-        type={'button'}
-        onClick={playNextSong}
-        className={classes.playBtn}
-      >
-        <PlayNextIcon />
-      </button>
+      <div className={classes.songNavigation}>
+        <button
+          type={'button'}
+          onClick={playPrevSong}
+          className={classes.playBtn}
+        >
+          <PlayPreviousIcon />
+        </button>
+        <button
+          type={'button'}
+          onClick={handlePlayPause}
+          className={classes.playBtn}
+        >
+          {playing ? <PauseIcon /> : <PlayIcon />}
+        </button>
+        <button
+          type={'button'}
+          onClick={playNextSong}
+          className={classes.playBtn}
+        >
+          <PlayNextIcon />
+        </button>
+      </div>
       <div className={classes.infoContainer}>
-        <div className={classes.songInfo}>
+        <div>
           {songInfo ? (
-            <>
+            <div className={classes.songInfo}>
               <p>{songInfo.common.title}</p>
+              <div className={classes.separator}></div>
               <p>{songInfo.common.artists}</p>
-            </>
+            </div>
           ) : null}
+          <div className={classes.volumeContainer}>
+            <VolumeUp />
+            <Slider
+              classes={{ root: classes.volumeSlider }}
+              value={volume * 100}
+              onChange={handleChange}
+              aria-labelledby={'continuous-slider'}
+            />
+          </div>
         </div>
         <div className={classes.songPlaybackProgress}>
           <span>
@@ -300,15 +402,6 @@ const Player = ({
             })}
           </span>
         </div>
-      </div>
-      <div className={classes.volumeContainer}>
-        <VolumeUp />
-        <Slider
-          classes={{ root: classes.volumeSlider }}
-          value={volume * 100}
-          onChange={handleChange}
-          aria-labelledby={'continuous-slider'}
-        />
       </div>
     </div>
   );
