@@ -73,6 +73,7 @@ const useStyle = makeStyles({
     boxShadow: '-2px 0 10px 1px #0008',
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
+    overflow: 'hidden',
 
     '&.expandedView': {
       height: '100vh',
@@ -93,7 +94,7 @@ const useStyle = makeStyles({
       },
 
       '& $volumeContainer': {
-        display: 'none'
+        // display: 'none'
       },
 
       '& $songInfo': {
