@@ -1,44 +1,43 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import makeStyles from "@material-ui/styles/makeStyles";
-import PlayArrowRounded from "@material-ui/icons/PlayArrowRounded";
-import PauseRounded from "@material-ui/icons/PauseRounded";
-import * as mm from "music-metadata";
-import { connect } from "react-redux";
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import makeStyles from '@material-ui/styles/makeStyles';
+import PlayArrowRounded from '@material-ui/icons/PlayArrowRounded';
+import PauseRounded from '@material-ui/icons/PauseRounded';
+import * as mm from 'music-metadata';
+import { connect } from 'react-redux';
 
 import {
   playSong as playSongAction,
   pauseSong as pauseSongAction
-} from "../redux/player/playerActions";
+} from '../redux/player/playerActions';
 
 const useStyles = makeStyles({
   root: {
-    background: "black",
-    borderTop: "1px solid #ddd2",
-    padding: "10px 20px",
-    display: "flex",
-    alignItems: "center",
-    color: "#808080",
-    cursor: "default",
-    "&:hover": {
-      color: "lightgrey"
+    borderTop: '1px solid #ddd2',
+    padding: '10px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    color: '#808080',
+    cursor: 'default',
+    '&:hover': {
+      color: 'lightgrey'
     }
   },
   playBtn: {
-    backgroundColor: "transparent",
-    color: "#fff",
-    border: "1px solid #fff",
-    borderRadius: "50%",
+    backgroundColor: 'transparent',
+    color: '#fff',
+    border: '1px solid #fff',
+    borderRadius: '50%',
     height: 30,
     width: 30,
     marginRight: 10,
     padding: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    outline: "none",
-    cursor: "pointer",
-    "& > svg": {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    outline: 'none',
+    cursor: 'pointer',
+    '& > svg': {
       fontSize: 18
     }
   },
@@ -66,7 +65,7 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
       : false;
 
   const albumArtDataURL = albumArt
-    ? `data:image/jpeg;base64,${albumArt.data.toString("base64")}`
+    ? `data:image/jpeg;base64,${albumArt.data.toString('base64')}`
     : undefined;
 
   const handlePlayPause = () => {
@@ -79,7 +78,7 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
 
   return songInfo ? (
     <div
-      role={"presentation"}
+      role={'presentation'}
       onClick={handlePlayPause}
       className={classes.root}
       {...rest}
@@ -87,9 +86,9 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
       <img
         className={classes.albumArt}
         src={albumArtDataURL}
-        alt={"albumArt"}
+        alt={'albumArt'}
       />
-      <button type={"button"} className={classes.playBtn}>
+      <button type={'button'} className={classes.playBtn}>
         {playing ? <PauseRounded /> : <PlayArrowRounded />}
       </button>
       <p>{songInfo.common.title}</p>
@@ -122,7 +121,4 @@ const mapStateToProps = ({ player }, ownProps) => ({
   playing: ownProps.metaData.id === player.activeSongId && player.playing
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SongListItem);
+export default connect(mapStateToProps, mapDispatchToProps)(SongListItem);

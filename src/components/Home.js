@@ -46,7 +46,7 @@ const useStyles = makeStyles({
   },
   container: {
     display: 'flex',
-    backgroundColor: '#000',
+    backgroundColor: '#0008',
     color: 'white',
     height: '100vh'
   },

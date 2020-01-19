@@ -62,14 +62,17 @@ const Slider = withStyles({
 
 const useStyle = makeStyles({
   root: {
-    width: '100%',
+    width: '100vw',
+    maxWidth: '100vw',
     maxHeight: 100,
     minHeight: 100,
-    backgroundColor: '#222',
+    backgroundColor: '#2225',
     display: 'flex',
     alignItems: 'center',
     padding: '0 20px',
+    boxShadow: '-2px 0 10px 1px #0008',
     transitionDuration: '1s',
+    justifyContent: 'space-evenly',
 
     '&.expandedView': {
       height: '100vh',
@@ -84,8 +87,8 @@ const useStyle = makeStyles({
       '& $albumArt': {
         height: '90vw',
         width: '90vw',
-        maxWidth: '80vh',
-        maxHeight: '80vh',
+        maxWidth: 'calc(100vh - 200px)',
+        maxHeight: 'calc(100vh - 300px)',
         margin: '20px'
       },
 
@@ -108,14 +111,19 @@ const useStyle = makeStyles({
         '& > svg': {
           fontSize: 28
         }
+      },
+      '& $infoContainer': {
+        flexGrow: 'unset'
       }
     }
   },
   background: {
     position: 'fixed',
     zIndex: -1,
-    height: '100vh',
-    width: '100vw',
+    top: '-20px',
+    left: '-20px',
+    height: 'calc(100vh + 40px)',
+    width: 'calc(100vw + 40px)',
     backgroundPosition: 'center',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
@@ -126,6 +134,7 @@ const useStyle = makeStyles({
   albumArt: {
     height: 50,
     width: 50,
+    minWidth: 50,
     backgroundColor: '#222',
     marginRight: 20,
     backgroundRepeat: 'no-repeat',
@@ -168,6 +177,7 @@ const useStyle = makeStyles({
     flexGrow: 1,
     flexDirection: 'column',
     alignSelf: 'stretch',
+    overflow: 'hidden',
     marginTop: 10,
     '& $songInfo, & > div': {
       display: 'flex',
@@ -179,12 +189,13 @@ const useStyle = makeStyles({
   },
   songInfo: {
     flexGrow: 1,
+    minWidth: 0,
     '& > p': {
       fontSize: '18px',
       margin: '0 10px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
-      textOverflow: 'ellipcis'
+      textOverflow: 'ellipsis'
     }
   },
   songPlaybackProgress: {
@@ -225,7 +236,7 @@ const Player = ({
   const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
   const [playedDuration, setPlayedDuration] = useState();
-  const [expandedView, setExpadedView] = useState(true);
+  const [expandedView, setExpadedView] = useState(false);
   const [volume, setVolume] = React.useState(30);
 
   useEffect(() => {

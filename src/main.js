@@ -16,6 +16,8 @@ const createWindow = () => {
     width: 800,
     height: 600,
     frame: false,
+    titleBarStyle: 'customButtonsOnHover',
+    transparent: true,
     webPreferences: {
       nodeIntegration: true
     }
