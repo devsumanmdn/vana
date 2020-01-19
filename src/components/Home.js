@@ -13,10 +13,14 @@ import fs from 'fs';
 import { remote } from 'electron';
 
 import { addSongs as addSongsAction } from '../redux/songs/songsActions';
-import { addSongsToQueue as addSongsToQueueAction } from '../redux/player/playerActions';
+import {
+  addSongsToQueue as addSongsToQueueAction,
+  clearQueue as clearQueueAction
+} from '../redux/player/playerActions';
 import SongListItem from './SongListItem';
 import Player from './Player';
 import Sidebar from './Sidebar';
+import shuffle from '../util/shuffle';
 
 const readFile = filePath => {
   return mm.parseFile(filePath).catch(err => {
@@ -67,6 +71,7 @@ const useStyles = makeStyles({
     '& > button': {
       margin: '10px 5px',
       color: '#FFFFFF',
+      borderColor: '#aaa4',
       '& .material-icons': {
         marginRight: 5
       }
@@ -81,7 +86,7 @@ const Row = memo(({ data, index, style }) => {
   ) : null;
 }, areEqual);
 
-const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
+const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
   const [folderPath, setFolderPath] = useState('');
 
   const { all: allSongs } = songs;
@@ -144,7 +149,14 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
   };
 
   const playAll = () => {
+    clearQueue();
     const songIds = Object.values(allSongs).map(({ id }) => id);
+    addSongsToQueue(songIds);
+  };
+
+  const shufflePlay = (e, songs = allSongs) => {
+    clearQueue();
+    const songIds = shuffle([...Object.values(songs).map(({ id }) => id)]);
     addSongsToQueue(songIds);
   };
 
@@ -161,7 +173,7 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
           <Button onClick={playAll}>
             <Icon>play_arrow</Icon>Play All
           </Button>
-          <Button onClick={playAll}>
+          <Button onClick={shufflePlay}>
             <Icon>shuffle</Icon>Shuffle ALL
           </Button>
         </div>
@@ -184,7 +196,8 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
         <Button
           style={{
             WebkitAppRegion: 'drag',
-            minWidth: 40,
+            minWidth: 30,
+            width: 40,
             cursor: 'grab',
             right: 6,
             top: 6,
@@ -210,7 +223,8 @@ Home.propTypes = {
     playing: PropTypes.bool
   }).isRequired,
   addSongs: PropTypes.func.isRequired,
-  addSongsToQueue: PropTypes.func.isRequired
+  addSongsToQueue: PropTypes.func.isRequired,
+  clearQueue: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ songs, player }) => ({
@@ -220,7 +234,8 @@ const mapStateToProps = ({ songs, player }) => ({
 
 const mapDispatchToProps = {
   addSongs: addSongsAction,
-  addSongsToQueue: addSongsToQueueAction
+  addSongsToQueue: addSongsToQueueAction,
+  clearQueue: clearQueueAction
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

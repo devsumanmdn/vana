@@ -1,17 +1,18 @@
 /* eslint-disable no-nested-ternary */
 import {
   ADD_SONGS_TO_QUEUE,
+  CLEAR_QUEUE,
   REMOVE_SONGS_TO_QUEUE,
   PLAY_NEXT_SONG,
   PLAY_PREV_SONG,
   PLAY_SONG,
   RESUME_SONG,
   PAUSE_SONG
-} from "./playerActionTypes";
+} from './playerActionTypes';
 
 const initialState = {
   queue: [],
-  activeSongId: null,
+  activeSongId: '',
   playing: false
 };
 
@@ -23,6 +24,12 @@ const playerReducer = (state = initialState, action) => {
         ...state,
         queue: [...new Set([...state.queue, ...payload])],
         ...(!state.activeSongId && { activeSongId: payload[0] })
+      };
+    case CLEAR_QUEUE:
+      return {
+        ...state,
+        activeSongId: '',
+        queue: []
       };
     case REMOVE_SONGS_TO_QUEUE:
       return {
@@ -52,7 +59,7 @@ const playerReducer = (state = initialState, action) => {
         presentActiveSongIndex < state.queue.length - 1
           ? presentActiveSongIndex + 1
           : 0;
-      const activeSongId = state.queue[nextSongIndex] || "";
+      const activeSongId = state.queue[nextSongIndex] || '';
       return {
         ...state,
         activeSongId,

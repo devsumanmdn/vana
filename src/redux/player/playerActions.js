@@ -1,12 +1,19 @@
 import {
   ADD_SONGS_TO_QUEUE,
+  CLEAR_QUEUE,
   REMOVE_SONGS_TO_QUEUE,
   PLAY_SONG,
   PLAY_NEXT_SONG,
   PLAY_PREV_SONG,
   RESUME_SONG,
   PAUSE_SONG
-} from "./playerActionTypes";
+} from './playerActionTypes';
+
+export function clearQueue() {
+  return {
+    type: CLEAR_QUEUE
+  };
+}
 
 export function addSongsToQueue(songs) {
   return {
