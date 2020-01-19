@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import PlayArrowRounded from '@material-ui/icons/PlayArrowRounded';
 import PauseRounded from '@material-ui/icons/PauseRounded';
-import * as mm from 'music-metadata';
+
 import { connect } from 'react-redux';
 
 import {
   playSong as playSongAction,
   pauseSong as pauseSongAction
 } from '../redux/player/playerActions';
+import parseFile from '../util/parseFile';
 
 const useStyles = makeStyles({
   root: {
@@ -52,21 +53,15 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
   const [songInfo, setSongInfo] = useState(null);
 
   useState(() => {
-    mm.parseFile(metaData.location).then(info => {
+    (async () => {
+      const info = await parseFile(metaData.location);
       setSongInfo(info);
-    });
+    })();
   }, [metaData.location]);
 
   const classes = useStyles();
 
-  const albumArt =
-    songInfo && songInfo.common.picture && songInfo.common.picture[0]
-      ? songInfo.common.picture[0]
-      : false;
-
-  const albumArtDataURL = albumArt
-    ? `data:image/jpeg;base64,${albumArt.data.toString('base64')}`
-    : undefined;
+  const albumArtDataURL = songInfo && songInfo.albumArt;
 
   const handlePlayPause = () => {
     if (playing) {

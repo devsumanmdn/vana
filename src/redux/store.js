@@ -1,9 +1,10 @@
-import { createStore, applyMiddleware, combineReducers, compose } from "redux";
-import thunk from "redux-thunk";
+import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
+import thunk from 'redux-thunk';
+import reduxLogger from 'redux-logger';
 
-import player from "./player/playerReducer";
-import songs from "./songs/songsReducer";
-import playlists from "./playlists/playlistsReducer";
+import player from './player/playerReducer';
+import songs from './songs/songsReducer';
+import playlists from './playlists/playlistsReducer';
 
 const rootReducer = combineReducers({
   player,
@@ -11,7 +12,7 @@ const rootReducer = combineReducers({
   playlists
 });
 
-const middlewares = [thunk];
+const middlewares = [thunk, reduxLogger];
 
 const enhancers = [];
 

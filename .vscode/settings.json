@@ -20,7 +20,7 @@
 	},
 	"[markdown]": {
 			"editor.wordWrap": "on",
-			"editor.quickSuggestions": false
+			"editor.quickSuggestions": true
 	},
 	"search.exclude": {
 			"**/node_modules": true,

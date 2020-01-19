@@ -12,7 +12,6 @@ import VolumeOff from '@material-ui/icons/VolumeOff';
 import VolumeDown from '@material-ui/icons/VolumeDown';
 import VolumeMute from '@material-ui/icons/VolumeMute';
 import VolumeUp from '@material-ui/icons/VolumeUp';
-import * as mm from 'music-metadata';
 import moment from 'moment';
 import momentDurationFormatSetup from 'moment-duration-format';
 import { connect } from 'react-redux';
@@ -27,6 +26,7 @@ import {
   playPrevSong as playPrevSongAction
   // setTotalDuration as setTotalDurationAction
 } from '../redux/player/playerActions';
+import parseFile from '../util/parseFile';
 
 const Slider = withStyles({
   root: {
@@ -74,6 +74,7 @@ const useStyle = makeStyles({
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
     overflow: 'hidden',
+    '-webkit-app-region': 'no-drag',
 
     '&.expandedView': {
       height: '100vh',
@@ -118,13 +119,18 @@ const useStyle = makeStyles({
       }
     }
   },
-  background: {
+  backgroundContainer: {
     position: 'fixed',
-    zIndex: -1,
-    top: '-20px',
-    left: '-20px',
-    height: 'calc(100vh + 40px)',
-    width: 'calc(100vw + 40px)',
+    zIndex: -9,
+    top: 0,
+    left: 0,
+    height: '100vh',
+    width: '100vw',
+    background: 'black'
+  },
+  background: {
+    height: '100%',
+    width: '100%',
     backgroundPosition: 'center',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
@@ -153,7 +159,7 @@ const useStyle = makeStyles({
   playBtn: {
     backgroundColor: 'transparent',
     color: '#fff',
-    border: '1px solid #fff',
+    border: 'none',
     borderRadius: '50%',
     height: 30,
     width: 30,
@@ -164,8 +170,20 @@ const useStyle = makeStyles({
     justifyContent: 'center',
     outline: 'none',
     cursor: 'pointer',
+
+    '&.playPause': {
+      border: '1px solid #fff'
+    },
+
+    '&:hover': {
+      '& > svg': {
+        transform: 'scale(1.09)'
+      }
+    },
+
     '& > svg': {
-      fontSize: 18
+      fontSize: 18,
+      transition: 'transform 0.3s'
     }
   },
   volumeContainer: {
@@ -218,6 +236,7 @@ const useStyle = makeStyles({
   separator: {
     height: 6,
     width: 6,
+    minWidth: 6,
     borderRadius: '50%',
     backgroundColor: '#fff2',
     margin: '4px 8px'
@@ -242,7 +261,7 @@ const Player = ({
 
   useEffect(() => {
     if (activeSong && activeSong.location) {
-      mm.parseFile(activeSong.location).then(metaData => {
+      parseFile(activeSong.location).then(metaData => {
         setSongInfo(metaData);
       });
     }
@@ -323,21 +342,18 @@ const Player = ({
 
   const { playing } = playerState;
 
-  const albumArt =
-    songInfo && songInfo.common.picture && songInfo.common.picture[0]
-      ? songInfo.common.picture[0]
-      : false;
-
-  const albumArtDataURL = albumArt
-    ? `data:image/jpeg;base64,${albumArt.data.toString('base64')}`
-    : undefined;
+  const albumArtDataURL = songInfo && songInfo.albumArt;
 
   return (
     <div className={clsx(classes.root, { expandedView })}>
-      <div
-        className={classes.background}
-        style={{ backgroundImage: `url(${albumArtDataURL}` }}
-      ></div>
+      <div className={classes.backgroundContainer}>
+        <div
+          className={classes.background}
+          style={{
+            backgroundImage: `url(${albumArtDataURL}`
+          }}
+        ></div>
+      </div>
       {songInfo ? (
         <div
           role={'presentation'}
@@ -364,7 +380,7 @@ const Player = ({
         <button
           type={'button'}
           onClick={handlePlayPause}
-          className={classes.playBtn}
+          className={clsx(classes.playBtn, 'playPause')}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
         </button>

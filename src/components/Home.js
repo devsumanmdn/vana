@@ -48,7 +48,8 @@ const useStyles = makeStyles({
     display: 'flex',
     backgroundColor: '#0008',
     color: 'white',
-    height: '100vh'
+    height: '100vh',
+    overflow: 'hidden'
   },
   mainView: {
     flexGrow: 1,
@@ -57,7 +58,7 @@ const useStyles = makeStyles({
   },
   songsList: {
     flexGrow: 1,
-    overflow: 'auto'
+    overflow: 'auto hidden'
   },
   buttonContainer: {
     display: 'flex',
@@ -151,7 +152,21 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
         <div className={classes.buttonContainer}>
           <Button onClick={chooseFolderDialog}>Add Songs</Button>
           <Button onClick={playAll}>
-            <Icon>play</Icon>Play All
+            <Icon>play_arrow</Icon>Play All
+          </Button>
+
+          <Button
+            style={{
+              WebkitAppRegion: 'drag',
+              minWidth: 40,
+              cursor: 'grab',
+              right: 6,
+              position: 'absolute',
+              zIndex: 99999,
+              background: '#FFF2'
+            }}
+          >
+            <Icon>drag_indicator</Icon>
           </Button>
         </div>
         <div className={classes.songsList}>
