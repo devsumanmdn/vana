@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol } = require('electron');
+const { app, BrowserWindow } = require('electron');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -30,17 +30,6 @@ const createWindow = () => {
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }
-
-  protocol.interceptFileProtocol(
-    'file',
-    (request, callback) => {
-      const url = request.url.substr(7); /* all urls start with 'file://' */
-      callback({ path: path.normalize(`${__dirname}/${url}`) });
-    },
-    err => {
-      if (err) console.error('Failed to register protocol');
-    }
-  );
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
