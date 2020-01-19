@@ -99,7 +99,6 @@ const useStyle = makeStyles({
       },
 
       '& $songInfo': {
-        marginTop: 10,
         '& > p': {
           fontSize: '18px',
           margin: '0 10px'
@@ -225,7 +224,10 @@ const useStyle = makeStyles({
   },
   progessSlider: {},
   volumeContainer: {
-    marginRight: 20,
+    marginRight: 10,
+    '& svg': {
+      width: 24
+    },
     '& > :not(last-child)': {
       marginRight: 5
     }
@@ -343,6 +345,25 @@ const Player = ({
   const { playing } = playerState;
 
   const albumArtDataURL = songInfo && songInfo.albumArt;
+  const getVolumeIcon = () => {
+    if (volume) {
+      if (volume < 0.3) {
+        return <VolumeMute />;
+      }
+
+      if (volume < 0.7) {
+        return <VolumeDown />;
+      }
+
+      return <VolumeUp />;
+    } else {
+      return <VolumeOff />;
+    }
+  };
+
+  if (!activeSong) {
+    return null;
+  }
 
   return (
     <div className={clsx(classes.root, { expandedView })}>
@@ -402,7 +423,7 @@ const Player = ({
             </div>
           ) : null}
           <div className={classes.volumeContainer}>
-            <VolumeUp />
+            {getVolumeIcon()}
             <Slider
               classes={{ root: classes.volumeSlider }}
               value={volume * 100}
