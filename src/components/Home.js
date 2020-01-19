@@ -5,7 +5,7 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import uuid from 'uuid';
-import { Button, Icon } from '@material-ui/core';
+import { Button as MUIButton, Icon } from '@material-ui/core';
 import * as mm from 'music-metadata';
 import { connect } from 'react-redux';
 
@@ -23,6 +23,8 @@ const readFile = filePath => {
     console.error(err.message);
   });
 };
+
+const Button = props => <MUIButton variant={'outlined'} {...props} />;
 
 const useStyles = makeStyles({
   '@global': {
@@ -64,7 +66,10 @@ const useStyles = makeStyles({
     display: 'flex',
     '& > button': {
       margin: '10px 5px',
-      color: '#FFFFFF'
+      color: '#FFFFFF',
+      '& .material-icons': {
+        marginRight: 5
+      }
     }
   }
 });
@@ -150,9 +155,14 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
       {/*<Sidebar chooseFolderDialog={chooseFolderDialog} />*/}
       <div className={classes.mainView}>
         <div className={classes.buttonContainer}>
-          <Button onClick={chooseFolderDialog}>Add Songs</Button>
+          <Button onClick={chooseFolderDialog}>
+            <Icon>add</Icon>Add Songs
+          </Button>
           <Button onClick={playAll}>
             <Icon>play_arrow</Icon>Play All
+          </Button>
+          <Button onClick={playAll}>
+            <Icon>shuffle</Icon>Shuffle ALL
           </Button>
         </div>
         <div className={classes.songsList}>
@@ -180,6 +190,7 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
             top: 6,
             position: 'absolute',
             zIndex: 99999,
+            color: '#FFF8',
             background: '#FFF2'
           }}
         >
