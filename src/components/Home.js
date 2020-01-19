@@ -154,20 +154,6 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
           <Button onClick={playAll}>
             <Icon>play_arrow</Icon>Play All
           </Button>
-
-          <Button
-            style={{
-              WebkitAppRegion: 'drag',
-              minWidth: 40,
-              cursor: 'grab',
-              right: 6,
-              position: 'absolute',
-              zIndex: 99999,
-              background: '#FFF2'
-            }}
-          >
-            <Icon>drag_indicator</Icon>
-          </Button>
         </div>
         <div className={classes.songsList}>
           <AutoSizer>
@@ -185,6 +171,20 @@ const Home = ({ songs, player, addSongs, addSongsToQueue }) => {
           </AutoSizer>
         </div>
         <Player activeSong={activeSong} playerState={player} />
+        <Button
+          style={{
+            WebkitAppRegion: 'drag',
+            minWidth: 40,
+            cursor: 'grab',
+            right: 6,
+            top: 6,
+            position: 'absolute',
+            zIndex: 99999,
+            background: '#FFF2'
+          }}
+        >
+          <Icon>drag_indicator</Icon>
+        </Button>
       </div>
     </div>
   );
