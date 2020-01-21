@@ -9,3 +9,7 @@ yarn
 ```
 yarn start
 ```
+## create installer
+```
+yarn make
+```
