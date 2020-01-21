@@ -1,6 +1,5 @@
 import React, { useState, memo } from 'react';
 import PropTypes from 'prop-types';
-import path from 'path';
 import makeStyles from '@material-ui/styles/makeStyles';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -9,7 +8,6 @@ import { Button as MUIButton, Icon } from '@material-ui/core';
 import * as mm from 'music-metadata';
 import { connect } from 'react-redux';
 
-import fs from 'fs';
 import { remote } from 'electron';
 
 import { addSongs as addSongsAction } from '../redux/songs/songsActions';
@@ -21,6 +19,7 @@ import SongListItem from './SongListItem';
 import Player from './Player';
 import Sidebar from './Sidebar';
 import shuffle from '../util/shuffle';
+import getArrayOfFiles from '../util/getArrayOfFiles';
 
 const readFile = filePath => {
   return mm.parseFile(filePath).catch(err => {
@@ -87,55 +86,10 @@ const Row = memo(({ data, index, style }) => {
 }, areEqual);
 
 const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
-  const [folderPath, setFolderPath] = useState('');
-
   const { all: allSongs } = songs;
-  const { activeSongId, playing } = player;
+  const { activeSongId } = player;
 
   const classes = useStyles();
-
-  const readTree = entry => {
-    fs.lstat(entry, async (err, stat) => {
-      if (err) throw err;
-      if (stat.isDirectory()) {
-        fs.readdir(entry, (readdirErr, files) => {
-          if (readdirErr) throw readdirErr;
-          files.forEach(file => {
-            readTree(path.join(entry, file));
-          });
-        });
-      } else if (
-        ['mp3', 'flac', 'ogg', 'webm'].includes(entry.split('.').slice(-1)[0])
-      ) {
-        // const file = await readFile(entry);
-        // if (file) {
-        //   const {
-        //     common: { album, artist, picture },
-        //     format: { codec }
-        //   } = file;
-        //   let {
-        //     common: { title }
-        //   } = file;
-
-        //   if (!title) {
-        //     [title] = entry.split("/").slice(-1);
-        //   }
-
-        addSongs([
-          {
-            // albumArt: picture && picture[0],
-            // codec,
-            // title,
-            // artist,
-            // album,
-            id: uuid(),
-            location: entry
-          }
-        ]);
-        // }
-      }
-    });
-  };
 
   const chooseFolderDialog = async () => {
     const { canceled, filePaths } = await remote.dialog.showOpenDialog({
@@ -143,8 +97,8 @@ const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
     });
 
     if (!canceled) {
-      setFolderPath(filePaths[0]);
-      readTree(filePaths[0]);
+      const listOfSongPaths = await getArrayOfFiles(filePaths[0]);
+      addSongs(listOfSongPaths.map(path => ({ location: path, id: uuid() })));
     }
   };
 
