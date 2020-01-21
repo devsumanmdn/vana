@@ -443,7 +443,7 @@ const Player = ({
             value={(playedDuration / totalDuration) * 100}
             aria-labelledby={'continuous-slider'}
             onChange={handleSeek}
-            onChangeCommitted={playSong}
+            onChangeCommitted={() => playSong()}
           />
           <span>
             {moment.duration(playedDuration, 'seconds').format('mm:ss', {
