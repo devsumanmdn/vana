@@ -18,10 +18,10 @@ const useStyles = makeStyles({
     padding: '10px 20px',
     display: 'flex',
     alignItems: 'center',
-    color: 'lightgrey',
+    color: '#808080',
     cursor: 'default',
     '&:hover': {
-      color: 'white'
+      color: 'lightgrey'
     }
   },
   playBtn: {
@@ -31,7 +31,6 @@ const useStyles = makeStyles({
     borderRadius: '50%',
     height: 30,
     width: 30,
-    minWidth: 30,
     marginRight: 10,
     padding: 0,
     display: 'flex',

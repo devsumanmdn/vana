@@ -28,7 +28,7 @@ const createWindow = () => {
 
   // Open the DevTools.
   if (process.env.NODE_ENV === 'development') {
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
   }
 
   // Emitted when the window is closed.
@@ -43,7 +43,7 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => setTimeout(createWindow, 1000));
+app.on('ready', createWindow);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

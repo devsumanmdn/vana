@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import makeStyles from '@material-ui/styles/makeStyles';
-import Slider from '@material-ui/core/Slider';
+import withStyles from '@material-ui/styles/withStyles';
 import PlayIcon from '@material-ui/icons/PlayArrowRounded';
 import PlayNextIcon from '@material-ui/icons/SkipNextRounded';
 import PlayPreviousIcon from '@material-ui/icons/SkipPreviousRounded';
 import PauseIcon from '@material-ui/icons/PauseRounded';
+import MUISlider from '@material-ui/core/Slider';
 import VolumeOff from '@material-ui/icons/VolumeOff';
 import VolumeDown from '@material-ui/icons/VolumeDown';
 import VolumeMute from '@material-ui/icons/VolumeMute';
@@ -27,17 +28,49 @@ import {
 } from '../redux/player/playerActions';
 import parseFile from '../util/parseFile';
 
+const Slider = withStyles({
+  root: {
+    color: '#52af77',
+    height: 4
+  },
+  thumb: {
+    height: 15,
+    width: 15,
+    backgroundColor: '#fff',
+    // border: "2px solid currentColor",
+    transformOrigin: 'center',
+    transform: 'translate(0, 0)',
+    boxShadow: '0 0 4px 2px #fff6',
+    '&:hover,&$active': {
+      boxShadow: 'inherit',
+      transform: 'scale(1.2)'
+    }
+  },
+  active: {},
+  valueLabel: {
+    left: 'calc(-50% + 4px)'
+  },
+  track: {
+    height: 4,
+    borderRadius: 2
+  },
+  rail: {
+    height: 4,
+    borderRadius: 2
+  }
+})(MUISlider);
+
 const useStyle = makeStyles({
   root: {
     width: '100vw',
     maxWidth: '100vw',
     maxHeight: 100,
     minHeight: 100,
-    // backgroundColor: '#2225',
+    backgroundColor: '#2225',
     display: 'flex',
     alignItems: 'center',
     padding: '0 20px',
-    // boxShadow: '-2px 0 10px 1px #0008',
+    boxShadow: '-2px 0 10px 1px #0008',
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
     overflow: 'hidden',
@@ -88,10 +121,11 @@ const useStyle = makeStyles({
   backgroundContainer: {
     position: 'fixed',
     zIndex: -9,
-    top: 30,
-    left: 30,
-    height: 'calc(100vh - 60px)',
-    width: 'calc(100vw - 60px)'
+    top: 0,
+    left: 0,
+    height: '100vh',
+    width: '100vw',
+    background: 'black'
   },
   background: {
     height: '100%',
@@ -99,15 +133,15 @@ const useStyle = makeStyles({
     backgroundPosition: 'center',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
-    filter: 'blur(1.20rem) brightness(0.5) opacity(0.8)',
+    filter: 'blur(1.25rem) brightness(0.5)',
     transition: 'background-image 1s .3s',
-    willChange: 'background-image',
-    borderRadius: 6
+    willChange: 'background-image'
   },
   albumArt: {
     height: 50,
     width: 50,
     minWidth: 50,
+    backgroundColor: '#222',
     marginRight: 20,
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'contain',
@@ -217,16 +251,14 @@ const Player = ({
   playSong,
   pauseSong,
   playNextSong,
-  playPrevSong,
-  expandedView,
-  setExpadedView
+  playPrevSong
 }) => {
   const classes = useStyle();
   const player = useRef(null);
   const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
   const [playedDuration, setPlayedDuration] = useState();
-
+  const [expandedView, setExpadedView] = useState(false);
   const [volume, setVolume] = React.useState(30);
 
   useEffect(() => {

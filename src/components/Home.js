@@ -4,12 +4,7 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import uuid from 'uuid';
-import {
-  Button as MUIButton,
-  IconButton,
-  Icon,
-  Dialog
-} from '@material-ui/core';
+import { Button as MUIButton, Icon } from '@material-ui/core';
 import * as mm from 'music-metadata';
 import { connect } from 'react-redux';
 
@@ -20,15 +15,11 @@ import {
   addSongsToQueue as addSongsToQueueAction,
   clearQueue as clearQueueAction
 } from '../redux/player/playerActions';
-
 import SongListItem from './SongListItem';
 import Player from './Player';
 import Sidebar from './Sidebar';
-import SettingsDialog from './SettingsDialog';
-
 import shuffle from '../util/shuffle';
 import getArrayOfFiles from '../util/getArrayOfFiles';
-import { toggleSettingsModal as toggleSettingsModalAction } from '../redux/settings/settingsActions';
 
 const readFile = filePath => {
   return mm.parseFile(filePath).catch(err => {
@@ -53,18 +44,17 @@ const useStyles = makeStyles({
     },
 
     '*::-webkit-scrollbar-thumb': {
-      backgroundColor: '#4444',
+      backgroundColor: '#444',
       outline: '1px solid slategrey',
       borderRadius: 4
     }
   },
   container: {
     display: 'flex',
-    backgroundColor: '#0000',
+    backgroundColor: '#0008',
     color: 'white',
     height: '100vh',
-    overflow: 'hidden',
-    borderRadius: 6
+    overflow: 'hidden'
   },
   mainView: {
     flexGrow: 1,
@@ -76,23 +66,15 @@ const useStyles = makeStyles({
     overflow: 'auto hidden'
   },
   buttonContainer: {
-    margin: '0 5px',
     display: 'flex',
-    flexWrap: 'wrap',
-    maxWidth: 'calc(100% - 70px)'
-  },
-  draggable: {
-    WebkitAppRegion: 'drag',
-    minWidth: 30,
-    width: 40,
-    cursor: 'grab',
-    right: 10,
-    top: 10,
-    position: 'absolute',
-    zIndex: 99999,
-    color: '#FFF4',
-    background: '#0000',
-    border: '1px solid #FFF1'
+    '& > button': {
+      margin: '10px 5px',
+      color: '#FFFFFF',
+      borderColor: '#aaa4',
+      '& .material-icons': {
+        marginRight: 5
+      }
+    }
   }
 });
 
@@ -103,15 +85,7 @@ const Row = memo(({ data, index, style }) => {
   ) : null;
 }, areEqual);
 
-const Home = ({
-  songs,
-  player,
-  addSongs,
-  addSongsToQueue,
-  clearQueue,
-  toggleSettingsModal
-}) => {
-  const [expandedView, setExpadedView] = useState(false);
+const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
   const { all: allSongs } = songs;
   const { activeSongId } = player;
 
@@ -146,13 +120,7 @@ const Home = ({
     <div className={classes.container}>
       {/*<Sidebar chooseFolderDialog={chooseFolderDialog} />*/}
       <div className={classes.mainView}>
-        <div
-          style={expandedView ? { visibility: 'hidden' } : {}}
-          className={classes.buttonContainer}
-        >
-          <IconButton onClick={toggleSettingsModal}>
-            <Icon>settings</Icon>
-          </IconButton>
+        <div className={classes.buttonContainer}>
           <Button onClick={chooseFolderDialog}>
             <Icon>add</Icon>Add Songs
           </Button>
@@ -163,10 +131,7 @@ const Home = ({
             <Icon>shuffle</Icon>Shuffle ALL
           </Button>
         </div>
-        <div
-          style={expandedView ? { visibility: 'hidden' } : {}}
-          className={classes.songsList}
-        >
+        <div className={classes.songsList}>
           <AutoSizer>
             {({ height, width }) => (
               <List
@@ -181,17 +146,24 @@ const Home = ({
             )}
           </AutoSizer>
         </div>
-        <Player
-          expandedView={expandedView}
-          setExpadedView={setExpadedView}
-          activeSong={activeSong}
-          playerState={player}
-        />
-        <Button className={classes.draggable}>
+        <Player activeSong={activeSong} playerState={player} />
+        <Button
+          style={{
+            WebkitAppRegion: 'drag',
+            minWidth: 30,
+            width: 40,
+            cursor: 'grab',
+            right: 6,
+            top: 6,
+            position: 'absolute',
+            zIndex: 99999,
+            color: '#FFF8',
+            background: '#FFF2'
+          }}
+        >
           <Icon>drag_indicator</Icon>
         </Button>
       </div>
-      <SettingsDialog />
     </div>
   );
 };
@@ -206,8 +178,7 @@ Home.propTypes = {
   }).isRequired,
   addSongs: PropTypes.func.isRequired,
   addSongsToQueue: PropTypes.func.isRequired,
-  clearQueue: PropTypes.func.isRequired,
-  toggleSettingsModal: PropTypes.func.isRequired
+  clearQueue: PropTypes.func.isRequired
 };
 
 const mapStateToProps = ({ songs, player }) => ({
@@ -218,8 +189,7 @@ const mapStateToProps = ({ songs, player }) => ({
 const mapDispatchToProps = {
   addSongs: addSongsAction,
   addSongsToQueue: addSongsToQueueAction,
-  clearQueue: clearQueueAction,
-  toggleSettingsModal: toggleSettingsModalAction
+  clearQueue: clearQueueAction
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
