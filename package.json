@@ -5,8 +5,8 @@
   "description": "My Electron application description",
   "main": ".webpack/main",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
+    "start": "electron-forge start  -- --enable-transparent-visuals .",
+    "package": "electron-forge package -- --enable-transparent-visuals .",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
