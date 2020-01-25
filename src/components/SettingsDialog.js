@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import makeStyles from '@material-ui/styles/makeStyles';
 import { connect } from 'react-redux';
 
 import {
@@ -11,7 +12,8 @@ import {
   FormLabel,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Box
 } from '@material-ui/core';
 
 import {
@@ -19,6 +21,18 @@ import {
   setTransparecnyAmount as setTransparecnyAmountAction,
   toggleTransparency as toggleTransparencyAction
 } from '../redux/settings/settingsActions';
+import { settingsPropType } from '../redux/settings/settingsReducer';
+
+const useStyles = makeStyles({
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+
+    '& > div': {
+      marginTop: 20
+    }
+  }
+});
 
 function SettingsDialog({
   settings,
@@ -26,25 +40,30 @@ function SettingsDialog({
   toggleSettingsModal,
   toggleTransparency
 }) {
+  const classes = useStyles();
   return (
     <Dialog open={settings.showModal}>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
-        <FormControl>
-          <FormLabel>Transparent Mode:</FormLabel>
-          <Switch
-            value={settings.transparentMode}
-            onChange={value => toggleTransparency(value)}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Transparancy Amount:</FormLabel>
-          <Slider
-            onChange={(e, value) => setTransparecnyAmount(100 - value)}
-            value={100 - settings.transparencyAmount}
-            max={100}
-          />
-        </FormControl>
+        <form className={classes.form}>
+          <FormControl>
+            <Box alignItems="center" display="flex">
+              <FormLabel>Transparent Mode:</FormLabel>
+              <Switch
+                checked={settings.transparentMode}
+                onChange={value => toggleTransparency(value)}
+              />
+            </Box>
+          </FormControl>
+          <FormControl>
+            <FormLabel>Transparancy Amount:</FormLabel>
+            <Slider
+              onChange={(e, value) => setTransparecnyAmount(100 - value)}
+              value={100 - settings.transparencyAmount}
+              max={100}
+            />
+          </FormControl>
+        </form>
       </DialogContent>
       <DialogActions>
         <Button onClick={toggleSettingsModal} color="primary">
@@ -56,11 +75,7 @@ function SettingsDialog({
 }
 
 SettingsDialog.propTypes = {
-  settings: PropTypes.shape({
-    showModal: PropTypes.bool.isRequired,
-    transparentMode: PropTypes.number.isRequired,
-    transparentMode: PropTypes.bool.isRequired
-  }).isRequired,
+  settings: settingsPropType.isRequired,
   toggleSettingsModal: PropTypes.func.isRequired,
   setTransparecnyAmount: PropTypes.func.isRequired,
   toggleTransparency: PropTypes.func.isRequired

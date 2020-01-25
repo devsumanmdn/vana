@@ -9,15 +9,22 @@ if (require('electron-squirrel-startup')) {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+const isDev = process.env.NODE_ENV === 'development';
 
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    minWidth: 300,
+    minHeight: 500,
     frame: false,
     titleBarStyle: 'customButtonsOnHover',
     transparent: true,
+    alwaysOnTop: true,
+    webPreferences: {
+      devTools: isDev
+    },
     webPreferences: {
       nodeIntegration: true
     }
@@ -27,7 +34,7 @@ const createWindow = () => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  if (process.env.NODE_ENV === 'development') {
+  if (isDev) {
     // mainWindow.webContents.openDevTools();
   }
 

@@ -36,8 +36,20 @@ const theme = createMuiTheme({
       root: {
         margin: '10px 5px',
         color: '#FFFFFF',
-        borderColor: '#aaa4',
-        '& .material-icons': {
+        backgroundColor: '#aaa2',
+
+        '&$outlined': {
+          borderColor: '#aaa4',
+          boxShadow:
+            '2px 1px 3px 1px #aaa2 inset, 12px 10px 20px 5px #aaa1 inset'
+        },
+
+        '&.iconButton': {
+          paddingLeft: 0,
+          paddingRight: 0,
+          minWidth: 40
+        },
+        '& .material-icons:not(:last-child)': {
           marginRight: 5
         }
       }

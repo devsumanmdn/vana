@@ -43,7 +43,25 @@ const useStyles = makeStyles({
     body: {
       fontFamily: 'Sans Serif',
       margin: 0,
-      padding: 0
+      padding: 10,
+      position: 'relative',
+      border: '1px solid #aaa0',
+      borderRadius: 6,
+      height: '100vh',
+      transitionDuration: '0.2s',
+      overflow: 'hidden',
+
+      '& #root': {
+        minHeight: '100%'
+      },
+
+      '&:hover': {
+        borderColor: '#aaa3',
+        boxShadow: '0 0 3px 2px #aaa2 inset',
+        '&$draggable': {
+          opacity: 1
+        }
+      }
     },
     '*::-webkit-scrollbar': {
       width: 8
@@ -60,20 +78,23 @@ const useStyles = makeStyles({
   },
   container: {
     display: 'flex',
+    flexDirection: 'column',
     backgroundColor: '#0000',
     color: 'white',
-    height: '100vh',
+    minHeight: '100%',
     overflow: 'hidden',
     borderRadius: 6
   },
   mainView: {
     flexGrow: 1,
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    minHeight: '100%'
   },
   songsList: {
     flexGrow: 1,
-    overflow: 'auto hidden'
+    overflow: 'auto hidden',
+    minHeight: '100%'
   },
   buttonContainer: {
     margin: '0 5px',
@@ -82,17 +103,18 @@ const useStyles = makeStyles({
     maxWidth: 'calc(100% - 70px)'
   },
   draggable: {
+    position: 'absolute',
     WebkitAppRegion: 'drag',
     minWidth: 30,
     width: 40,
     cursor: 'grab',
-    right: 10,
-    top: 10,
-    position: 'absolute',
+    right: 8,
+    top: 0,
     zIndex: 99999,
     color: '#FFF4',
     background: '#0000',
-    border: '1px solid #FFF1'
+    border: '1px solid #FFF1',
+    opacity: 4
   }
 });
 
@@ -150,17 +172,20 @@ const Home = ({
           style={expandedView ? { visibility: 'hidden' } : {}}
           className={classes.buttonContainer}
         >
-          <IconButton onClick={toggleSettingsModal}>
+          <Button className={'iconButton'} onClick={toggleSettingsModal}>
             <Icon>settings</Icon>
-          </IconButton>
+          </Button>
           <Button onClick={chooseFolderDialog}>
-            <Icon>add</Icon>Add Songs
+            <Icon>add</Icon>
+            <span>Add Songs</span>
           </Button>
           <Button onClick={playAll}>
-            <Icon>play_arrow</Icon>Play All
+            <Icon>play_arrow</Icon>
+            <span>Play All</span>
           </Button>
           <Button onClick={shufflePlay}>
-            <Icon>shuffle</Icon>Shuffle ALL
+            <Icon>shuffle</Icon>
+            <span>Shuffle ALL</span>
           </Button>
         </div>
         <div

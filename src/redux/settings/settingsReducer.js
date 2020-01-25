@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 import {
   TOGGLE_SETTINGS_MODAL,
   TOGGLE_TRANSPARENT_MODE,
@@ -33,3 +35,9 @@ const settingsReducer = (state = initailState, action) => {
   }
 };
 export default settingsReducer;
+
+export const settingsPropType = PropTypes.shape({
+  showModal: PropTypes.bool.isRequired,
+  transparentMode: PropTypes.number.isRequired,
+  transparencyAmount: PropTypes.bool.isRequired
+});

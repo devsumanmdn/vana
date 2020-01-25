@@ -12,10 +12,10 @@ import VolumeDown from '@material-ui/icons/VolumeDown';
 import VolumeMute from '@material-ui/icons/VolumeMute';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import moment from 'moment';
-import momentDurationFormatSetup from 'moment-duration-format';
+// import momentDurationFormatSetup from 'moment-duration-format';
 import { connect } from 'react-redux';
 
-const fs = window.require('fs');
+import { settingsPropType } from '../redux/settings/settingsReducer';
 
 import {
   playSong as playSongAction,
@@ -27,10 +27,12 @@ import {
 } from '../redux/player/playerActions';
 import parseFile from '../util/parseFile';
 
+const fs = window.require('fs');
+
 const useStyle = makeStyles({
   root: {
-    width: '100vw',
-    maxWidth: '100vw',
+    width: '100%',
+    maxWidth: '100%',
     maxHeight: 100,
     minHeight: 100,
     // backgroundColor: '#2225',
@@ -44,8 +46,8 @@ const useStyle = makeStyles({
     '-webkit-app-region': 'no-drag',
 
     '&.expandedView': {
-      height: '100vh',
-      width: '100vw',
+      height: '100%',
+      width: '100%',
       padding: '10px 20px',
       top: 0,
       left: 0,
@@ -54,8 +56,8 @@ const useStyle = makeStyles({
       position: 'fixed',
 
       '& $albumArt': {
-        height: '90vw',
-        width: '90vw',
+        height: '90%',
+        width: '90%',
         maxWidth: 'calc(100vh - 200px)',
         maxHeight: 'calc(100vh - 300px)',
         margin: '20px'
@@ -67,17 +69,17 @@ const useStyle = makeStyles({
 
       '& $songInfo': {
         '& > p': {
-          fontSize: '18px',
+          fontSize: '1.1em',
           margin: '0 10px'
         }
       },
       '& $playBtn': {
-        height: 50,
-        width: 50,
+        height: '3.2em',
+        width: '3.2em',
         marginRight: 20,
         padding: 10,
         '& > svg': {
-          fontSize: 28
+          fontSize: '1.6em'
         }
       },
       '& $infoContainer': {
@@ -85,24 +87,36 @@ const useStyle = makeStyles({
       }
     }
   },
-  backgroundContainer: {
+  backgroundContainer: ({ transparentMode }) => ({
     position: 'fixed',
     zIndex: -9,
-    top: 30,
-    left: 30,
-    height: 'calc(100vh - 60px)',
-    width: 'calc(100vw - 60px)'
-  },
+    ...(transparentMode
+      ? {
+          top: 30,
+          left: 30,
+          height: 'calc(100% - 60px)',
+          width: 'calc(100% - 60px)'
+        }
+      : {
+          top: 0,
+          left: 0,
+          height: '100%',
+          width: '100%',
+          backgroundColor: '#000'
+        })
+  }),
   background: {
     height: '100%',
     width: '100%',
     backgroundPosition: 'center',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
-    filter: 'blur(1.20rem) brightness(0.5) opacity(0.8)',
-    transition: 'background-image 1s .3s',
+    filter: ({ transparencyAmount }) =>
+      `blur(1.20rem) brightness(0.5) opacity(${transparencyAmount / 100})`,
+    transition: 'background-image 1.5s .5s',
     willChange: 'background-image',
-    borderRadius: 6
+    borderRadius: 6,
+    backgroundColor: '#0008'
   },
   albumArt: {
     height: 50,
@@ -113,7 +127,7 @@ const useStyle = makeStyles({
     backgroundSize: 'contain',
     backgroundPosition: 'center',
     backgroundColor: 'transparent',
-    transition: 'background-image 0.6s .2s',
+    transition: 'background-image 1s .3s',
     willChange: 'background-image',
     cursor: 'nesw-resize'
   },
@@ -147,14 +161,8 @@ const useStyle = makeStyles({
     },
 
     '& > svg': {
-      fontSize: 18,
+      fontSize: '1.1em',
       transition: 'transform 0.3s'
-    }
-  },
-  volumeContainer: {
-    display: 'flex',
-    '& > svg': {
-      marginRight: 10
     }
   },
   infoContainer: {
@@ -175,7 +183,7 @@ const useStyle = makeStyles({
     flexGrow: 1,
     minWidth: 0,
     '& > p': {
-      fontSize: '18px',
+      fontSize: '1.1em',
       margin: '0 10px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
@@ -190,8 +198,10 @@ const useStyle = makeStyles({
   },
   progessSlider: {},
   volumeContainer: {
+    display: 'flex',
     marginRight: 10,
     '& svg': {
+      marginRight: 10,
       width: 24
     },
     '& > :not(last-child)': {
@@ -219,9 +229,10 @@ const Player = ({
   playNextSong,
   playPrevSong,
   expandedView,
-  setExpadedView
+  setExpadedView,
+  settings
 }) => {
-  const classes = useStyle();
+  const classes = useStyle(settings);
   const player = useRef(null);
   const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
@@ -324,9 +335,8 @@ const Player = ({
       }
 
       return <VolumeUp />;
-    } else {
-      return <VolumeOff />;
     }
+    return <VolumeOff />;
   };
 
   if (!activeSong) {
@@ -341,18 +351,19 @@ const Player = ({
           style={{
             backgroundImage: `url(${albumArtDataURL}`
           }}
-        ></div>
+        />
       </div>
       {songInfo ? (
         <div
-          role={'presentation'}
+          role="presentation"
           onClick={() => setExpadedView(!expandedView)}
           className={classes.albumArt}
           style={{ backgroundImage: `url(${albumArtDataURL}` }}
-          alt={'albumArt'}
+          alt="albumArt"
         />
       ) : (
         <div
+          role="presentation"
           onClick={() => setExpadedView(!expandedView)}
           className={classes.albumArt}
           style={{ background: '#000' }}
@@ -360,21 +371,21 @@ const Player = ({
       )}
       <div className={classes.songNavigation}>
         <button
-          type={'button'}
+          type="button"
           onClick={playPrevSong}
           className={classes.playBtn}
         >
           <PlayPreviousIcon />
         </button>
         <button
-          type={'button'}
+          type="button"
           onClick={handlePlayPause}
           className={clsx(classes.playBtn, 'playPause')}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
         </button>
         <button
-          type={'button'}
+          type="button"
           onClick={playNextSong}
           className={classes.playBtn}
         >
@@ -386,7 +397,7 @@ const Player = ({
           {songInfo ? (
             <div className={classes.songInfo}>
               <p>{songInfo.common.title}</p>
-              <div className={classes.separator}></div>
+              <div className={classes.separator} />
               <p>{songInfo.common.artists}</p>
             </div>
           ) : null}
@@ -396,7 +407,7 @@ const Player = ({
               classes={{ root: classes.volumeSlider }}
               value={volume * 100}
               onChange={handleChange}
-              aria-labelledby={'continuous-slider'}
+              aria-labelledby="continuous-slider"
             />
           </div>
         </div>
@@ -409,7 +420,7 @@ const Player = ({
           <Slider
             classes={{ root: classes.progessSlider }}
             value={(playedDuration / totalDuration) * 100}
-            aria-labelledby={'continuous-slider'}
+            aria-labelledby="continuous-slider"
             onChange={handleSeek}
             onChangeCommitted={() => playSong()}
           />
@@ -434,15 +445,20 @@ Player.propTypes = {
     location: PropTypes.string,
     albumArt: PropTypes.string
   }),
+  expandedView: PropTypes.func.isRequired,
+  setExpadedView: PropTypes.func.isRequired,
   playSong: PropTypes.func.isRequired,
   pauseSong: PropTypes.func.isRequired,
   playNextSong: PropTypes.func.isRequired,
-  playPrevSong: PropTypes.func.isRequired
+  playPrevSong: PropTypes.func.isRequired,
+  settings: settingsPropType.isRequired
 };
 
 Player.defaultProps = {
   activeSong: null
 };
+
+const mapStateToProps = ({ settings }) => ({ settings });
 
 const mapDispatchToProps = {
   playSong: playSongAction,
@@ -452,4 +468,4 @@ const mapDispatchToProps = {
   playPrevSong: playPrevSongAction
 };
 
-export default connect(null, mapDispatchToProps)(Player);
+export default connect(mapStateToProps, mapDispatchToProps)(Player);

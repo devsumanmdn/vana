@@ -1,15 +1,23 @@
-const rules = require("./webpack.rules");
-const webpack = require("webpack");
+const rules = require('./webpack.rules');
+const webpack = require('webpack');
 
 rules.push(
   {
     test: /\.css$/,
-    use: [{ loader: "style-loader" }, { loader: "css-loader" }]
+    use: [{ loader: 'style-loader' }, { loader: 'css-loader' }]
   },
   {
     test: /\.js$/,
     exclude: /node_modules/,
-    loader: "babel-loader"
+    loader: 'babel-loader'
+  },
+  {
+    test: /\.(png|jpe?g|gif)$/i,
+    use: [
+      {
+        loader: 'file-loader'
+      }
+    ]
   }
 );
 
@@ -19,7 +27,7 @@ module.exports = {
     rules
   },
   devServer: {
-    contentBase: "./src/"
+    contentBase: './src/'
   }
   // externals: [
   //   {
