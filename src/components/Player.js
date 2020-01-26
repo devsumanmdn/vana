@@ -12,10 +12,9 @@ import VolumeDown from '@material-ui/icons/VolumeDown';
 import VolumeMute from '@material-ui/icons/VolumeMute';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
 // import momentDurationFormatSetup from 'moment-duration-format';
 import { connect } from 'react-redux';
-
-import { settingsPropType } from '../redux/settings/settingsReducer';
 
 import {
   playSong as playSongAction,
@@ -26,8 +25,11 @@ import {
   // setTotalDuration as setTotalDurationAction
 } from '../redux/player/playerActions';
 import parseFile from '../util/parseFile';
+import { settingsPropType } from '../redux/settings/settingsReducer';
 
 const fs = window.require('fs');
+
+momentDurationFormatSetup(moment);
 
 const useStyle = makeStyles({
   root: {
@@ -89,7 +91,7 @@ const useStyle = makeStyles({
   },
   backgroundContainer: ({ transparentMode }) => ({
     position: 'fixed',
-    zIndex: -9,
+    zIndex: -999999,
     ...(transparentMode
       ? {
           top: 30,
@@ -140,8 +142,8 @@ const useStyle = makeStyles({
     color: '#fff',
     border: 'none',
     borderRadius: '50%',
-    height: 30,
-    width: 30,
+    height: '2.2em',
+    width: '2.2em',
     marginRight: 10,
     padding: 0,
     display: 'flex',
@@ -161,7 +163,7 @@ const useStyle = makeStyles({
     },
 
     '& > svg': {
-      fontSize: '1.1em',
+      fontSize: '1.4em',
       transition: 'transform 0.3s'
     }
   },
@@ -445,7 +447,7 @@ Player.propTypes = {
     location: PropTypes.string,
     albumArt: PropTypes.string
   }),
-  expandedView: PropTypes.func.isRequired,
+  expandedView: PropTypes.bool.isRequired,
   setExpadedView: PropTypes.func.isRequired,
   playSong: PropTypes.func.isRequired,
   pauseSong: PropTypes.func.isRequired,

@@ -8,12 +8,13 @@ import {
   Button,
   Slider,
   Switch,
-  FormControl,
-  FormLabel,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Box
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction
 } from '@material-ui/core';
 
 import {
@@ -46,23 +47,36 @@ function SettingsDialog({
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <form className={classes.form}>
-          <FormControl>
-            <Box alignItems="center" display="flex">
-              <FormLabel>Transparent Mode:</FormLabel>
-              <Switch
-                checked={settings.transparentMode}
-                onChange={value => toggleTransparency(value)}
+          <List className={classes.root}>
+            <ListItem>
+              <ListItemText
+                id="switch-list-label-wifi"
+                primary="Transparancy Amount"
               />
-            </Box>
-          </FormControl>
-          <FormControl>
-            <FormLabel>Transparancy Amount:</FormLabel>
-            <Slider
-              onChange={(e, value) => setTransparecnyAmount(100 - value)}
-              value={100 - settings.transparencyAmount}
-              max={100}
-            />
-          </FormControl>
+              <br />
+              <Slider
+                onChange={(e, value) => setTransparecnyAmount(100 - value)}
+                value={100 - settings.transparencyAmount}
+                max={100}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText
+                id="switch-list-label-tranparent-mode"
+                primary="Transparent Mode"
+              />
+              <ListItemSecondaryAction>
+                <Switch
+                  edge="end"
+                  onChange={value => toggleTransparency(value)}
+                  checked={settings.transparentMode}
+                  inputProps={{
+                    'aria-labelledby': 'switch-list-label-tranparent-mode'
+                  }}
+                />
+              </ListItemSecondaryAction>
+            </ListItem>
+          </List>
         </form>
       </DialogContent>
       <DialogActions>

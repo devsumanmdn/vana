@@ -38,6 +38,6 @@ export default settingsReducer;
 
 export const settingsPropType = PropTypes.shape({
   showModal: PropTypes.bool.isRequired,
-  transparentMode: PropTypes.number.isRequired,
-  transparencyAmount: PropTypes.bool.isRequired
+  transparentMode: PropTypes.bool.isRequired,
+  transparencyAmount: PropTypes.number.isRequired
 });
