@@ -65,6 +65,7 @@
     "@material-ui/system": "^4.4.3",
     "clsx": "^1.0.4",
     "electron-squirrel-startup": "^1.0.0",
+    "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
     "music-metadata": "^4.8.0",

@@ -21,10 +21,15 @@ const theme = createMuiTheme({
     }
   },
   overrides: {
+    MuiListItemText: {
+      secondary: {
+        color: '#aaa'
+      }
+    },
     MuiDialog: {
       paper: {
-        background: '#000',
-        color: '#FFF'
+        background: '#FFF',
+        color: '#888'
       }
     },
     MuiFormLabel: {
@@ -39,9 +44,8 @@ const theme = createMuiTheme({
         backgroundColor: '#aaa2',
 
         '&$outlined': {
-          borderColor: '#aaa4',
-          boxShadow:
-            '2px 1px 3px 1px #aaa2 inset, 12px 10px 20px 5px #aaa1 inset'
+          borderColor: '#FFF6',
+          boxShadow: '0 0 3px 1px #aaa2 inset, 0 0 20px 5px #aaa1 inset'
         },
 
         '&.iconButton': {
@@ -56,25 +60,20 @@ const theme = createMuiTheme({
     },
     MuiSlider: {
       root: {
-        color: '#52af77',
-        height: 4
+        color: '#52af77'
+        // height: 4
       },
       thumb: {
-        height: 15,
-        width: 15,
-        backgroundColor: '#fff',
-        // border: "2px solid currentColor",
-        transformOrigin: 'center',
-        transform: 'translate(0, 0)',
-        boxShadow: '0 0 4px 2px #fff6',
+        transitionDuration: '0.2s',
+        overflow: 'visible',
+        backgroundColor: '#52af77',
+        boxShadow: '0 0 1px 2px #fff inset, 0 0 4px 1px #52af7788',
+        marginTop: -4,
+        marginLeft: -8,
         '&:hover,&$active': {
-          boxShadow: 'inherit',
+          boxShadow: '0 0 1px 2px #fff inset',
           transform: 'scale(1.2)'
         }
-      },
-      active: {},
-      valueLabel: {
-        left: 'calc(-50% + 4px)'
       },
       track: {
         height: 4,

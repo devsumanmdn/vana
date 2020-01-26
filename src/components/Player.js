@@ -117,8 +117,8 @@ const useStyle = makeStyles({
       `blur(1.20rem) brightness(0.5) opacity(${transparencyAmount / 100})`,
     transition: 'background-image 1.5s .5s',
     willChange: 'background-image',
-    borderRadius: 6,
-    backgroundColor: '#0008'
+    backgroundColor: '#0008',
+    borderRadius: 6
   },
   albumArt: {
     height: 50,
@@ -341,10 +341,6 @@ const Player = ({
     return <VolumeOff />;
   };
 
-  if (!activeSong) {
-    return null;
-  }
-
   return (
     <div className={clsx(classes.root, { expandedView })}>
       <div className={classes.backgroundContainer}>
@@ -355,84 +351,88 @@ const Player = ({
           }}
         />
       </div>
-      {songInfo ? (
-        <div
-          role="presentation"
-          onClick={() => setExpadedView(!expandedView)}
-          className={classes.albumArt}
-          style={{ backgroundImage: `url(${albumArtDataURL}` }}
-          alt="albumArt"
-        />
-      ) : (
-        <div
-          role="presentation"
-          onClick={() => setExpadedView(!expandedView)}
-          className={classes.albumArt}
-          style={{ background: '#000' }}
-        />
-      )}
-      <div className={classes.songNavigation}>
-        <button
-          type="button"
-          onClick={playPrevSong}
-          className={classes.playBtn}
-        >
-          <PlayPreviousIcon />
-        </button>
-        <button
-          type="button"
-          onClick={handlePlayPause}
-          className={clsx(classes.playBtn, 'playPause')}
-        >
-          {playing ? <PauseIcon /> : <PlayIcon />}
-        </button>
-        <button
-          type="button"
-          onClick={playNextSong}
-          className={classes.playBtn}
-        >
-          <PlayNextIcon />
-        </button>
-      </div>
-      <div className={classes.infoContainer}>
-        <div>
+      {activeSong ? (
+        <>
           {songInfo ? (
-            <div className={classes.songInfo}>
-              <p>{songInfo.common.title}</p>
-              <div className={classes.separator} />
-              <p>{songInfo.common.artists}</p>
-            </div>
-          ) : null}
-          <div className={classes.volumeContainer}>
-            {getVolumeIcon()}
-            <Slider
-              classes={{ root: classes.volumeSlider }}
-              value={volume * 100}
-              onChange={handleChange}
-              aria-labelledby="continuous-slider"
+            <div
+              role="presentation"
+              onClick={() => setExpadedView(!expandedView)}
+              className={classes.albumArt}
+              style={{ backgroundImage: `url(${albumArtDataURL}` }}
+              alt="albumArt"
             />
+          ) : (
+            <div
+              role="presentation"
+              onClick={() => setExpadedView(!expandedView)}
+              className={classes.albumArt}
+              style={{ background: '#000' }}
+            />
+          )}
+          <div className={classes.songNavigation}>
+            <button
+              type="button"
+              onClick={playPrevSong}
+              className={classes.playBtn}
+            >
+              <PlayPreviousIcon />
+            </button>
+            <button
+              type="button"
+              onClick={handlePlayPause}
+              className={clsx(classes.playBtn, 'playPause')}
+            >
+              {playing ? <PauseIcon /> : <PlayIcon />}
+            </button>
+            <button
+              type="button"
+              onClick={playNextSong}
+              className={classes.playBtn}
+            >
+              <PlayNextIcon />
+            </button>
           </div>
-        </div>
-        <div className={classes.songPlaybackProgress}>
-          <span>
-            {moment.duration(totalDuration, 'seconds').format('mm:ss', {
-              trim: false
-            })}
-          </span>
-          <Slider
-            classes={{ root: classes.progessSlider }}
-            value={(playedDuration / totalDuration) * 100}
-            aria-labelledby="continuous-slider"
-            onChange={handleSeek}
-            onChangeCommitted={() => playSong()}
-          />
-          <span>
-            {moment.duration(playedDuration, 'seconds').format('mm:ss', {
-              trim: false
-            })}
-          </span>
-        </div>
-      </div>
+          <div className={classes.infoContainer}>
+            <div>
+              {songInfo ? (
+                <div className={classes.songInfo}>
+                  <p>{songInfo.common.title}</p>
+                  <div className={classes.separator} />
+                  <p>{songInfo.common.artists}</p>
+                </div>
+              ) : null}
+              <div className={classes.volumeContainer}>
+                {getVolumeIcon()}
+                <Slider
+                  classes={{ root: classes.volumeSlider }}
+                  value={volume * 100}
+                  onChange={handleChange}
+                  aria-labelledby="continuous-slider"
+                />
+              </div>
+            </div>
+            <div className={classes.songPlaybackProgress}>
+              <span>
+                {moment.duration(totalDuration, 'seconds').format('mm:ss', {
+                  trim: false
+                })}
+              </span>
+              <Slider
+                classes={{ root: classes.progessSlider }}
+                value={(playedDuration / totalDuration) * 100}
+                aria-labelledby="continuous-slider"
+                onChange={handleSeek}
+                onChangeCommitted={() => playSong()}
+              />
+              <span>
+                {moment.duration(playedDuration, 'seconds').format('mm:ss', {
+                  trim: false
+                })}
+              </span>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };

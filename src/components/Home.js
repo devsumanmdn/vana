@@ -35,12 +35,9 @@ const useStyles = makeStyles({
       height: '100vh',
       transitionDuration: '0.2s',
       overflow: 'hidden',
-      backgroundColor: 'transparent',
       borderRadius: 6,
-      background: ({ transparentMode, backgroundColor = '#000' }) =>
+      background: ({ transparentMode, backgroundColor = '#444' }) =>
         transparentMode ? 'transparent' : backgroundColor,
-      padding: ({ transparentMode, windowPadding = 20 }) =>
-        transparentMode ? windowPadding : 0,
 
       '& #root': {
         borderRadius: 6,
@@ -94,8 +91,28 @@ const useStyles = makeStyles({
   buttonContainer: {
     margin: '0 5px',
     display: 'flex',
-    flexWrap: 'wrap',
-    maxWidth: 'calc(100% - 70px)'
+    maxWidth: 'calc(100% - 70px)',
+    alignSelf: 'flex-start',
+
+    '& button': {
+      minWidth: 'fit-content',
+      '& .text': {
+        whiteSpace: 'nowrap'
+      }
+    },
+
+    '&.overflowing': {
+      '& button': {
+        overflow: 'hidden',
+        minWidth: 40,
+        '& .material-icons': {
+          marginRight: 0
+        },
+        '& .text': {
+          display: 'none'
+        }
+      }
+    }
   },
   draggable: {
     position: 'absolute',
@@ -136,9 +153,10 @@ const Home = ({
   settings
 }) => {
   const [expandedView, setExpadedView] = useState(false);
+  const buttonContainerRef = createRef();
+
   const { all: allSongs } = songs;
   const { activeSongId } = player;
-  const buttonContainerRef = createRef();
 
   const classes = useStyles(settings);
 
@@ -179,20 +197,21 @@ const Home = ({
           className={classes.buttonContainer}
           ref={buttonContainerRef}
         >
-          <Button className="iconButton" onClick={toggleSettingsModal}>
+          <Button
+            title="Settings"
+            className="iconButton"
+            onClick={toggleSettingsModal}
+          >
             <Icon>settings</Icon>
           </Button>
-          <Button onClick={chooseFolderDialog}>
+          <Button title="Add songs" onClick={chooseFolderDialog}>
             <Icon>add</Icon>
-            <span>Add Songs</span>
           </Button>
-          <Button onClick={playAll}>
+          <Button title="Play all songs" onClick={playAll}>
             <Icon>play_arrow</Icon>
-            <span>Play All</span>
           </Button>
-          <Button onClick={shuffleAll}>
+          <Button title="Shuffle all songs" onClick={shuffleAll}>
             <Icon>shuffle</Icon>
-            <span>Shuffle ALL</span>
           </Button>
         </div>
         <div
@@ -219,7 +238,10 @@ const Home = ({
           activeSong={activeSong}
           playerState={player}
         />
-        <Button className={classes.draggable}>
+        <Button
+          title="Click and drag to move window"
+          className={classes.draggable}
+        >
           <Icon>drag_indicator</Icon>
         </Button>
       </div>

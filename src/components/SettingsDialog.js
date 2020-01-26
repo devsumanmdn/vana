@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import { connect } from 'react-redux';
@@ -32,8 +32,43 @@ const useStyles = makeStyles({
     '& > div': {
       marginTop: 20
     }
+  },
+  paper: {
+    minWidth: 300
   }
 });
+
+const TransparencyDialog = ({
+  open,
+  onClose,
+  transparencyAmount,
+  setTransparecnyAmount
+}) => (
+  <Dialog open={open}>
+    <DialogTitle>Transparancy Amount</DialogTitle>
+    <DialogContent style={{ overflowY: 'visible' }}>
+      <Slider
+        valueLabelDisplay="auto"
+        aria-labelledby="slider-list-label-transparency-amount"
+        onChange={(e, value) => setTransparecnyAmount(100 - value)}
+        value={transparencyAmount}
+        max={100}
+      />
+    </DialogContent>
+    <DialogActions>
+      <Button variant="outlined" onClick={onClose} color="primary">
+        Ok
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
+TransparencyDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  transparencyAmount: PropTypes.number.isRequired,
+  setTransparecnyAmount: PropTypes.func.isRequired
+};
 
 function SettingsDialog({
   settings,
@@ -42,22 +77,21 @@ function SettingsDialog({
   toggleTransparency
 }) {
   const classes = useStyles();
+  const [transparencyDialogOpen, setTransparencyDialogOpen] = useState(false);
+
+  const transparencyAmount = 100 - settings.transparencyAmount;
+
   return (
-    <Dialog open={settings.showModal}>
+    <Dialog classes={{ paper: classes.paper }} open={settings.showModal}>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <form className={classes.form}>
           <List className={classes.root}>
-            <ListItem>
+            <ListItem button onClick={() => setTransparencyDialogOpen(true)}>
               <ListItemText
-                id="switch-list-label-wifi"
+                id="slider-list-label-transparency-amount"
                 primary="Transparancy Amount"
-              />
-              <br />
-              <Slider
-                onChange={(e, value) => setTransparecnyAmount(100 - value)}
-                value={100 - settings.transparencyAmount}
-                max={100}
+                secondary={`${transparencyAmount}%`}
               />
             </ListItem>
             <ListItem>
@@ -84,6 +118,12 @@ function SettingsDialog({
           Done
         </Button>
       </DialogActions>
+      <TransparencyDialog
+        open={transparencyDialogOpen}
+        onClose={() => setTransparencyDialogOpen(false)}
+        setTransparecnyAmount={setTransparecnyAmount}
+        transparencyAmount={transparencyAmount}
+      />
     </Dialog>
   );
 }
