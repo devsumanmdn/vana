@@ -87,17 +87,11 @@ function SettingsDialog({
       <DialogContent>
         <form className={classes.form}>
           <List className={classes.root}>
-            <ListItem button onClick={() => setTransparencyDialogOpen(true)}>
-              <ListItemText
-                id="slider-list-label-transparency-amount"
-                primary="Transparancy Amount"
-                secondary={`${transparencyAmount}%`}
-              />
-            </ListItem>
             <ListItem>
               <ListItemText
                 id="switch-list-label-tranparent-mode"
                 primary="Transparent Mode"
+                secondary={settings.transparentMode ? 'On' : 'Off'}
               />
               <ListItemSecondaryAction>
                 <Switch
@@ -109,6 +103,13 @@ function SettingsDialog({
                   }}
                 />
               </ListItemSecondaryAction>
+            </ListItem>
+            <ListItem button onClick={() => setTransparencyDialogOpen(true)}>
+              <ListItemText
+                id="slider-list-label-transparency-amount"
+                primary="Transparancy Amount"
+                secondary={`${transparencyAmount}%`}
+              />
             </ListItem>
           </List>
         </form>
