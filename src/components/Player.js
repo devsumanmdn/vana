@@ -423,7 +423,7 @@ const Player = ({
                 <div className={classes.songInfo}>
                   <p>{songInfo.common.title}</p>
                   <div className={classes.separator} />
-                  <p>{songInfo.common.artists} sjjhvasj c</p>
+                  <p>{songInfo.common.artists}</p>
                 </div>
               ) : null}
               <div className={classes.volumeContainer}>
