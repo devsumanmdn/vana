@@ -2,21 +2,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import makeStyles from '@material-ui/styles/makeStyles';
-import withStyles from '@material-ui/styles/withStyles';
+import Slider from '@material-ui/core/Slider';
 import PlayIcon from '@material-ui/icons/PlayArrowRounded';
 import PlayNextIcon from '@material-ui/icons/SkipNextRounded';
 import PlayPreviousIcon from '@material-ui/icons/SkipPreviousRounded';
 import PauseIcon from '@material-ui/icons/PauseRounded';
-import MUISlider from '@material-ui/core/Slider';
 import VolumeOff from '@material-ui/icons/VolumeOff';
 import VolumeDown from '@material-ui/icons/VolumeDown';
+import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button';
 import VolumeMute from '@material-ui/icons/VolumeMute';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import moment from 'moment';
 import momentDurationFormatSetup from 'moment-duration-format';
+// import momentDurationFormatSetup from 'moment-duration-format';
 import { connect } from 'react-redux';
-
-const fs = window.require('fs');
 
 import {
   playSong as playSongAction,
@@ -27,68 +27,52 @@ import {
   // setTotalDuration as setTotalDurationAction
 } from '../redux/player/playerActions';
 import parseFile from '../util/parseFile';
+import { settingsPropType } from '../redux/settings/settingsReducer';
 
-const Slider = withStyles({
-  root: {
-    color: '#52af77',
-    height: 4
-  },
-  thumb: {
-    height: 15,
-    width: 15,
-    backgroundColor: '#fff',
-    // border: "2px solid currentColor",
-    transformOrigin: 'center',
-    transform: 'translate(0, 0)',
-    boxShadow: '0 0 4px 2px #fff6',
-    '&:hover,&$active': {
-      boxShadow: 'inherit',
-      transform: 'scale(1.2)'
-    }
-  },
-  active: {},
-  valueLabel: {
-    left: 'calc(-50% + 4px)'
-  },
-  track: {
-    height: 4,
-    borderRadius: 2
-  },
-  rail: {
-    height: 4,
-    borderRadius: 2
-  }
-})(MUISlider);
+const fs = window.require('fs');
+
+momentDurationFormatSetup(moment);
 
 const useStyle = makeStyles({
   root: {
-    width: '100vw',
-    maxWidth: '100vw',
+    width: '100%',
+    maxWidth: '100%',
     maxHeight: 100,
     minHeight: 100,
-    backgroundColor: '#2225',
     display: 'flex',
     alignItems: 'center',
     padding: '0 20px',
-    boxShadow: '-2px 0 10px 1px #0008',
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
     overflow: 'hidden',
     '-webkit-app-region': 'no-drag',
 
+    '&.hidden': {
+      minHeight: 0,
+      height: 0
+    },
+
+    '&:not(.expandedView)': {
+      background: '#fff1'
+    },
+
     '&.expandedView': {
-      height: '100vh',
-      width: '100vw',
+      height: '100%',
+      width: '100%',
       padding: '10px 20px',
       top: 0,
       left: 0,
       maxHeight: 'unset',
       flexDirection: 'column',
       position: 'fixed',
+      WebkitAppRegion: 'drag',
 
+      '& > *': {
+        WebkitAppRegion: 'no-drag'
+      },
       '& $albumArt': {
-        height: '90vw',
-        width: '90vw',
+        height: '90%',
+        width: '90%',
         maxWidth: 'calc(100vh - 200px)',
         maxHeight: 'calc(100vh - 300px)',
         margin: '20px'
@@ -100,54 +84,66 @@ const useStyle = makeStyles({
 
       '& $songInfo': {
         '& > p': {
-          fontSize: '18px',
+          fontSize: '1.1em',
           margin: '0 10px'
         }
       },
       '& $playBtn': {
-        height: 50,
-        width: 50,
+        height: '3.2em',
+        width: '3.2em',
         marginRight: 20,
         padding: 10,
         '& > svg': {
-          fontSize: 28
+          fontSize: '1.6em'
         }
       },
       '& $infoContainer': {
-        flexGrow: 'unset'
+        flexGrow: 'unset',
+        alignSelf: 'stretch'
       }
     }
   },
-  backgroundContainer: {
+  backgroundContainer: ({ transparentMode }) => ({
     position: 'fixed',
-    zIndex: -9,
-    top: 0,
-    left: 0,
-    height: '100vh',
-    width: '100vw',
-    background: 'black'
-  },
+    zIndex: -999999,
+    ...(transparentMode
+      ? {
+          top: 30,
+          left: 30,
+          height: 'calc(100% - 60px)',
+          width: 'calc(100% - 60px)'
+        }
+      : {
+          top: 0,
+          left: 0,
+          height: '100%',
+          width: '100%',
+          backgroundColor: '#000'
+        })
+  }),
   background: {
     height: '100%',
     width: '100%',
     backgroundPosition: 'center',
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
-    filter: 'blur(1.25rem) brightness(0.5)',
-    transition: 'background-image 1s .3s',
-    willChange: 'background-image'
+    filter: ({ transparencyAmount }) =>
+      `blur(1.20rem) brightness(0.5) opacity(${transparencyAmount / 100})`,
+    transition: 'background-image 1.5s .5s',
+    willChange: 'background-image',
+    backgroundColor: '#0008',
+    borderRadius: 6
   },
   albumArt: {
     height: 50,
     width: 50,
     minWidth: 50,
-    backgroundColor: '#222',
     marginRight: 20,
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'contain',
     backgroundPosition: 'center',
     backgroundColor: 'transparent',
-    transition: 'background-image 0.6s .2s',
+    transition: 'background-image 1s .3s',
     willChange: 'background-image',
     cursor: 'nesw-resize'
   },
@@ -160,8 +156,8 @@ const useStyle = makeStyles({
     color: '#fff',
     border: 'none',
     borderRadius: '50%',
-    height: 30,
-    width: 30,
+    height: '2.2em',
+    width: '2.2em',
     marginRight: 10,
     padding: 0,
     display: 'flex',
@@ -181,20 +177,13 @@ const useStyle = makeStyles({
     },
 
     '& > svg': {
-      fontSize: 18,
+      fontSize: '1.4em',
       transition: 'transform 0.3s'
-    }
-  },
-  volumeContainer: {
-    display: 'flex',
-    '& > svg': {
-      marginRight: 10
     }
   },
   infoContainer: {
     flexGrow: 1,
     flexDirection: 'column',
-    alignSelf: 'stretch',
     overflow: 'hidden',
     marginTop: 10,
     '& $songInfo, & > div': {
@@ -209,7 +198,7 @@ const useStyle = makeStyles({
     flexGrow: 1,
     minWidth: 0,
     '& > p': {
-      fontSize: '18px',
+      fontSize: '1.1em',
       margin: '0 10px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
@@ -224,16 +213,23 @@ const useStyle = makeStyles({
   },
   progessSlider: {},
   volumeContainer: {
-    marginRight: 10,
-    '& svg': {
-      width: 24
-    },
-    '& > :not(last-child)': {
-      marginRight: 5
+    display: 'flex',
+
+    '& button': {
+      background: 'transparent',
+      minWidth: 30,
+      margin: 0,
+      marginRight: 10,
+      '& svg': {
+        width: 24
+      }
     }
   },
   volumeSlider: {
-    width: 100
+    minHeight: 100
+  },
+  tooltip: {
+    padding: '15px 5px 10px'
   },
   separator: {
     height: 6,
@@ -251,19 +247,23 @@ const Player = ({
   playSong,
   pauseSong,
   playNextSong,
-  playPrevSong
+  playPrevSong,
+  expandedView,
+  setExpadedView,
+  settings
 }) => {
-  const classes = useStyle();
+  const classes = useStyle(settings);
   const player = useRef(null);
   const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
   const [playedDuration, setPlayedDuration] = useState();
-  const [expandedView, setExpadedView] = useState(false);
+
   const [volume, setVolume] = React.useState(30);
 
   useEffect(() => {
     if (activeSong && activeSong.location) {
       parseFile(activeSong.location).then(metaData => {
+        document.title = metaData.common.title || 'Song';
         setSongInfo(metaData);
       });
     }
@@ -323,6 +323,12 @@ const Player = ({
       player.current.addEventListener('ended', () => {
         playNextSong();
       });
+      player.current.addEventListener('play', () => {
+        playSong();
+      });
+      player.current.addEventListener('pause', () => {
+        pauseSong();
+      });
       player.current.play();
     });
   };
@@ -356,102 +362,110 @@ const Player = ({
       }
 
       return <VolumeUp />;
-    } else {
-      return <VolumeOff />;
     }
+    return <VolumeOff />;
   };
 
-  if (!activeSong) {
-    return null;
-  }
-
   return (
-    <div className={clsx(classes.root, { expandedView })}>
+    <div className={clsx(classes.root, { expandedView, hidden: !activeSong })}>
       <div className={classes.backgroundContainer}>
         <div
           className={classes.background}
           style={{
             backgroundImage: `url(${albumArtDataURL}`
           }}
-        ></div>
-      </div>
-      {songInfo ? (
-        <div
-          role={'presentation'}
-          onClick={() => setExpadedView(!expandedView)}
-          className={classes.albumArt}
-          style={{ backgroundImage: `url(${albumArtDataURL}` }}
-          alt={'albumArt'}
         />
-      ) : (
-        <div
-          onClick={() => setExpadedView(!expandedView)}
-          className={classes.albumArt}
-          style={{ background: '#000' }}
-        />
-      )}
-      <div className={classes.songNavigation}>
-        <button
-          type={'button'}
-          onClick={playPrevSong}
-          className={classes.playBtn}
-        >
-          <PlayPreviousIcon />
-        </button>
-        <button
-          type={'button'}
-          onClick={handlePlayPause}
-          className={clsx(classes.playBtn, 'playPause')}
-        >
-          {playing ? <PauseIcon /> : <PlayIcon />}
-        </button>
-        <button
-          type={'button'}
-          onClick={playNextSong}
-          className={classes.playBtn}
-        >
-          <PlayNextIcon />
-        </button>
       </div>
-      <div className={classes.infoContainer}>
-        <div>
+      {activeSong ? (
+        <>
           {songInfo ? (
-            <div className={classes.songInfo}>
-              <p>{songInfo.common.title}</p>
-              <div className={classes.separator}></div>
-              <p>{songInfo.common.artists}</p>
-            </div>
-          ) : null}
-          <div className={classes.volumeContainer}>
-            {getVolumeIcon()}
-            <Slider
-              classes={{ root: classes.volumeSlider }}
-              value={volume * 100}
-              onChange={handleChange}
-              aria-labelledby={'continuous-slider'}
+            <div
+              role="presentation"
+              onClick={() => setExpadedView(!expandedView)}
+              className={classes.albumArt}
+              style={{ backgroundImage: `url(${albumArtDataURL}` }}
+              alt="albumArt"
             />
+          ) : (
+            <div
+              role="presentation"
+              onClick={() => setExpadedView(!expandedView)}
+              className={classes.albumArt}
+              style={{ background: '#000' }}
+            />
+          )}
+          <div className={classes.songNavigation}>
+            <button
+              type="button"
+              onClick={playPrevSong}
+              className={classes.playBtn}
+            >
+              <PlayPreviousIcon />
+            </button>
+            <button
+              type="button"
+              onClick={handlePlayPause}
+              className={clsx(classes.playBtn, 'playPause')}
+            >
+              {playing ? <PauseIcon /> : <PlayIcon />}
+            </button>
+            <button
+              type="button"
+              onClick={playNextSong}
+              className={classes.playBtn}
+            >
+              <PlayNextIcon />
+            </button>
           </div>
-        </div>
-        <div className={classes.songPlaybackProgress}>
-          <span>
-            {moment.duration(totalDuration, 'seconds').format('mm:ss', {
-              trim: false
-            })}
-          </span>
-          <Slider
-            classes={{ root: classes.progessSlider }}
-            value={(playedDuration / totalDuration) * 100}
-            aria-labelledby={'continuous-slider'}
-            onChange={handleSeek}
-            onChangeCommitted={() => playSong()}
-          />
-          <span>
-            {moment.duration(playedDuration, 'seconds').format('mm:ss', {
-              trim: false
-            })}
-          </span>
-        </div>
-      </div>
+          <div className={classes.infoContainer}>
+            <div>
+              {songInfo ? (
+                <div className={classes.songInfo}>
+                  <p>{songInfo.common.title}</p>
+                  <div className={classes.separator} />
+                  <p>{songInfo.common.artists} sjjhvasj c</p>
+                </div>
+              ) : null}
+              <div className={classes.volumeContainer}>
+                <Tooltip
+                  interactive
+                  classes={{ tooltip: classes.tooltip }}
+                  title={
+                    <Slider
+                      classes={{ root: classes.volumeSlider }}
+                      orientation="vertical"
+                      value={volume * 100}
+                      onChange={handleChange}
+                      aria-labelledby="continuous-slider"
+                    />
+                  }
+                >
+                  <Button onClick={() => {}}>{getVolumeIcon()}</Button>
+                </Tooltip>
+              </div>
+            </div>
+            <div className={classes.songPlaybackProgress}>
+              <span>
+                {moment.duration(totalDuration, 'seconds').format('mm:ss', {
+                  trim: false
+                })}
+              </span>
+              <Slider
+                classes={{ root: classes.progessSlider }}
+                value={(playedDuration / totalDuration) * 100}
+                aria-labelledby="continuous-slider"
+                onChange={handleSeek}
+                onChangeCommitted={() => playSong()}
+              />
+              <span>
+                {moment.duration(playedDuration, 'seconds').format('mm:ss', {
+                  trim: false
+                })}
+              </span>
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };
@@ -466,15 +480,20 @@ Player.propTypes = {
     location: PropTypes.string,
     albumArt: PropTypes.string
   }),
+  expandedView: PropTypes.bool.isRequired,
+  setExpadedView: PropTypes.func.isRequired,
   playSong: PropTypes.func.isRequired,
   pauseSong: PropTypes.func.isRequired,
   playNextSong: PropTypes.func.isRequired,
-  playPrevSong: PropTypes.func.isRequired
+  playPrevSong: PropTypes.func.isRequired,
+  settings: settingsPropType.isRequired
 };
 
 Player.defaultProps = {
   activeSong: null
 };
+
+const mapStateToProps = ({ settings }) => ({ settings });
 
 const mapDispatchToProps = {
   playSong: playSongAction,
@@ -484,4 +503,4 @@ const mapDispatchToProps = {
   playPrevSong: playPrevSongAction
 };
 
-export default connect(null, mapDispatchToProps)(Player);
+export default connect(mapStateToProps, mapDispatchToProps)(Player);

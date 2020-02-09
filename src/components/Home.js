@@ -1,11 +1,11 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, createRef } from 'react';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import uuid from 'uuid';
-import { Button as MUIButton, Icon } from '@material-ui/core';
-import * as mm from 'music-metadata';
+import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
 import { connect } from 'react-redux';
 
 import { remote } from 'electron';
@@ -15,64 +15,104 @@ import {
   addSongsToQueue as addSongsToQueueAction,
   clearQueue as clearQueueAction
 } from '../redux/player/playerActions';
+
 import SongListItem from './SongListItem';
 import Player from './Player';
-import Sidebar from './Sidebar';
+// import Sidebar from './Sidebar';
+import SettingsDialog from './SettingsDialog';
+
 import shuffle from '../util/shuffle';
 import getArrayOfFiles from '../util/getArrayOfFiles';
+import { toggleSettingsModal as toggleSettingsModalAction } from '../redux/settings/settingsActions';
+import { settingsPropType } from '../redux/settings/settingsReducer';
 
-const readFile = filePath => {
-  return mm.parseFile(filePath).catch(err => {
-    console.error(err.message);
-  });
-};
-
-const Button = props => <MUIButton variant={'outlined'} {...props} />;
+// const Button = props => <MUIButton variant="outlined" {...props} />;
 
 const useStyles = makeStyles({
   '@global': {
     body: {
       fontFamily: 'Sans Serif',
       margin: 0,
-      padding: 0
+      height: '100vh',
+      transitionDuration: '0.2s',
+      overflow: 'hidden',
+      borderRadius: 6,
+      background: ({ transparentMode, backgroundColor = '#444' }) =>
+        transparentMode ? 'transparent' : backgroundColor,
+
+      '& #root': {
+        borderRadius: 6,
+        position: 'relative',
+        minHeight: '100%'
+      },
+
+      '&:hover': {
+        boxShadow: '0 0 3px 1px #aaa4 inset',
+        '&$draggable': {
+          opacity: 1
+        }
+      }
     },
     '*::-webkit-scrollbar': {
       width: 8
     },
     '*::-webkit-scrollbar-track': {
-      boxShadow: 'inset 0 0 6px rgba(0,0,0,0.3)'
+      // boxShadow: 'inset 0 0 6px rgba(0,0,0,0.3)',
+      backgroundColor: 'transparent'
     },
 
     '*::-webkit-scrollbar-thumb': {
-      backgroundColor: '#444',
+      backgroundColor: '#4444',
       outline: '1px solid slategrey',
       borderRadius: 4
     }
   },
   container: {
     display: 'flex',
-    backgroundColor: '#0008',
+    flexDirection: 'column',
+    backgroundColor: '#0000',
     color: 'white',
-    height: '100vh',
-    overflow: 'hidden'
+    minHeight: '100%',
+    overflow: 'hidden',
+    borderRadius: 6
   },
   mainView: {
     flexGrow: 1,
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    maxHeight: '100%',
+    height: '100vh'
   },
   songsList: {
     flexGrow: 1,
-    overflow: 'auto hidden'
+    overflow: 'auto hidden',
+    overflowY: 'hidden'
   },
   buttonContainer: {
+    WebkitAppRegion: 'drag',
+    margin: '0 5px',
     display: 'flex',
-    '& > button': {
-      margin: '10px 5px',
-      color: '#FFFFFF',
-      borderColor: '#aaa4',
-      '& .material-icons': {
-        marginRight: 5
+    // alignSelf: 'flex-start',
+    zIndex: 99999,
+
+    '& button': {
+      minWidth: 'fit-content',
+      '-webkit-app-region': 'no-drag',
+      '& .text': {
+        whiteSpace: 'nowrap'
+      }
+    },
+
+    '&.overflowing': {
+      '& button': {
+        overflow: 'hidden',
+        minWidth: 40,
+        '& .material-icons': {
+          marginRight: 0
+        },
+        '& .text': {
+          display: 'none'
+        }
       }
     }
   }
@@ -85,16 +125,36 @@ const Row = memo(({ data, index, style }) => {
   ) : null;
 }, areEqual);
 
-const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
+Row.propTypes = {
+  data: PropTypes.shape().isRequired,
+  index: PropTypes.number.isRequired,
+  style: PropTypes.shape().isRequired
+};
+
+const Home = ({
+  songs,
+  player,
+  addSongs,
+  addSongsToQueue,
+  clearQueue,
+  toggleSettingsModal,
+  settings
+}) => {
+  const [expandedView, setExpadedView] = useState(false);
+  const buttonContainerRef = createRef();
+
   const { all: allSongs } = songs;
   const { activeSongId } = player;
 
-  const classes = useStyles();
+  const classes = useStyles(settings);
 
   const chooseFolderDialog = async () => {
-    const { canceled, filePaths } = await remote.dialog.showOpenDialog({
-      properties: ['openDirectory']
-    });
+    const { canceled, filePaths } = await remote.dialog.showOpenDialog(
+      remote.BrowserWindow.getFocusedWindow(),
+      {
+        properties: ['openDirectory']
+      }
+    );
 
     if (!canceled) {
       const listOfSongPaths = await getArrayOfFiles(filePaths[0]);
@@ -108,9 +168,9 @@ const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
     addSongsToQueue(songIds);
   };
 
-  const shufflePlay = (e, songs = allSongs) => {
+  const shuffleAll = () => {
     clearQueue();
-    const songIds = shuffle([...Object.values(songs).map(({ id }) => id)]);
+    const songIds = shuffle([...Object.values(allSongs).map(({ id }) => id)]);
     addSongsToQueue(songIds);
   };
 
@@ -118,20 +178,34 @@ const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
 
   return (
     <div className={classes.container}>
-      {/*<Sidebar chooseFolderDialog={chooseFolderDialog} />*/}
+      {/* <Sidebar chooseFolderDialog={chooseFolderDialog} /> */}
       <div className={classes.mainView}>
-        <div className={classes.buttonContainer}>
-          <Button onClick={chooseFolderDialog}>
-            <Icon>add</Icon>Add Songs
+        <div
+          style={expandedView ? { visibility: 'hidden' } : {}}
+          className={classes.buttonContainer}
+          ref={buttonContainerRef}
+        >
+          <Button
+            title="Settings"
+            className="iconButton"
+            onClick={toggleSettingsModal}
+          >
+            <Icon>settings</Icon>
           </Button>
-          <Button onClick={playAll}>
-            <Icon>play_arrow</Icon>Play All
+          <Button title="Add songs" onClick={chooseFolderDialog}>
+            <Icon>add</Icon>
           </Button>
-          <Button onClick={shufflePlay}>
-            <Icon>shuffle</Icon>Shuffle ALL
+          <Button title="Play all songs" onClick={playAll}>
+            <Icon>play_arrow</Icon>
+          </Button>
+          <Button title="Shuffle all songs" onClick={shuffleAll}>
+            <Icon>shuffle</Icon>
           </Button>
         </div>
-        <div className={classes.songsList}>
+        <div
+          style={expandedView ? { visibility: 'hidden' } : {}}
+          className={classes.songsList}
+        >
           <AutoSizer>
             {({ height, width }) => (
               <List
@@ -146,24 +220,14 @@ const Home = ({ songs, player, addSongs, addSongsToQueue, clearQueue }) => {
             )}
           </AutoSizer>
         </div>
-        <Player activeSong={activeSong} playerState={player} />
-        <Button
-          style={{
-            WebkitAppRegion: 'drag',
-            minWidth: 30,
-            width: 40,
-            cursor: 'grab',
-            right: 6,
-            top: 6,
-            position: 'absolute',
-            zIndex: 99999,
-            color: '#FFF8',
-            background: '#FFF2'
-          }}
-        >
-          <Icon>drag_indicator</Icon>
-        </Button>
+        <Player
+          expandedView={expandedView}
+          setExpadedView={setExpadedView}
+          activeSong={activeSong}
+          playerState={player}
+        />
       </div>
+      <SettingsDialog />
     </div>
   );
 };
@@ -178,18 +242,22 @@ Home.propTypes = {
   }).isRequired,
   addSongs: PropTypes.func.isRequired,
   addSongsToQueue: PropTypes.func.isRequired,
-  clearQueue: PropTypes.func.isRequired
+  clearQueue: PropTypes.func.isRequired,
+  toggleSettingsModal: PropTypes.func.isRequired,
+  settings: settingsPropType.isRequired
 };
 
-const mapStateToProps = ({ songs, player }) => ({
+const mapStateToProps = ({ songs, player, settings }) => ({
   songs,
-  player
+  player,
+  settings
 });
 
 const mapDispatchToProps = {
   addSongs: addSongsAction,
   addSongsToQueue: addSongsToQueueAction,
-  clearQueue: clearQueueAction
+  clearQueue: clearQueueAction,
+  toggleSettingsModal: toggleSettingsModalAction
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

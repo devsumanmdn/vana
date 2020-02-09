@@ -1,12 +1,12 @@
-import React from "react";
-import { Provider } from "react-redux";
-import { ThemeProvider } from "@material-ui/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
+import React from 'react';
+import { Provider } from 'react-redux';
+import { ThemeProvider } from '@material-ui/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
-import theme from "./theme";
+import theme from './theme';
 
-import store from "./redux/store";
-import Home from "./components/Home";
+import store from './redux/store';
+import Home from './components/Home';
 
 const App = () => {
   return (

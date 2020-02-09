@@ -1,19 +1,20 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import thunk from 'redux-thunk';
-import reduxLogger from 'redux-logger';
 import { remote } from 'electron';
 
 import player from './player/playerReducer';
 import songs from './songs/songsReducer';
 import playlists from './playlists/playlistsReducer';
+import settings from './settings/settingsReducer';
 
 const rootReducer = combineReducers({
   player,
   songs,
-  playlists
+  playlists,
+  settings
 });
 
-const middlewares = [thunk, reduxLogger];
+const middlewares = [thunk];
 
 const enhancers = [];
 
