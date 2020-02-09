@@ -22,7 +22,7 @@ const createWindow = () => {
     frame: false,
     titleBarStyle: 'customButtonsOnHover',
     transparent: true,
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     webPreferences: {
       devTools: isDev,
       nodeIntegration: true
