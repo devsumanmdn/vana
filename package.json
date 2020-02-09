@@ -1,8 +1,8 @@
 {
   "name": "vana",
   "productName": "vana",
-  "version": "0.0.1",
-  "description": "My Electron application description",
+  "version": "0.0.2",
+  "description": "Plays offline Music.",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start  -- --enable-transparent-visuals .",
@@ -24,7 +24,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "vana"
+            "name": "Vana"
           }
         },
         {
