@@ -4,7 +4,8 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import uuid from 'uuid';
-import { Button as MUIButton, Icon } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
 import { connect } from 'react-redux';
 
 import { remote } from 'electron';
@@ -25,7 +26,7 @@ import getArrayOfFiles from '../util/getArrayOfFiles';
 import { toggleSettingsModal as toggleSettingsModalAction } from '../redux/settings/settingsActions';
 import { settingsPropType } from '../redux/settings/settingsReducer';
 
-const Button = props => <MUIButton variant="outlined" {...props} />;
+// const Button = props => <MUIButton variant="outlined" {...props} />;
 
 const useStyles = makeStyles({
   '@global': {
@@ -85,17 +86,18 @@ const useStyles = makeStyles({
   songsList: {
     flexGrow: 1,
     overflow: 'auto hidden',
-    boxShadow: '0 1px  0 -4px #aaa2 inset, 0 -4px  0 0 #aaa2 inset',
     overflowY: 'hidden'
   },
   buttonContainer: {
+    WebkitAppRegion: 'drag',
     margin: '0 5px',
     display: 'flex',
-    maxWidth: 'calc(100% - 70px)',
-    alignSelf: 'flex-start',
+    // alignSelf: 'flex-start',
+    zIndex: 99999,
 
     '& button': {
       minWidth: 'fit-content',
+      '-webkit-app-region': 'no-drag',
       '& .text': {
         whiteSpace: 'nowrap'
       }
@@ -113,20 +115,6 @@ const useStyles = makeStyles({
         }
       }
     }
-  },
-  draggable: {
-    position: 'absolute',
-    WebkitAppRegion: 'drag',
-    minWidth: 30,
-    width: 40,
-    cursor: 'grab',
-    right: 8,
-    top: 0,
-    zIndex: 99999,
-    color: '#FFF4',
-    background: '#0000',
-    border: '1px solid #FFF1',
-    opacity: 4
   }
 });
 
@@ -238,12 +226,6 @@ const Home = ({
           activeSong={activeSong}
           playerState={player}
         />
-        <Button
-          title="Click and drag to move window"
-          className={classes.draggable}
-        >
-          <Icon>drag_indicator</Icon>
-        </Button>
       </div>
       <SettingsDialog />
     </div>

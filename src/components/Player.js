@@ -9,6 +9,8 @@ import PlayPreviousIcon from '@material-ui/icons/SkipPreviousRounded';
 import PauseIcon from '@material-ui/icons/PauseRounded';
 import VolumeOff from '@material-ui/icons/VolumeOff';
 import VolumeDown from '@material-ui/icons/VolumeDown';
+import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button';
 import VolumeMute from '@material-ui/icons/VolumeMute';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import moment from 'moment';
@@ -37,15 +39,22 @@ const useStyle = makeStyles({
     maxWidth: '100%',
     maxHeight: 100,
     minHeight: 100,
-    // backgroundColor: '#2225',
     display: 'flex',
     alignItems: 'center',
     padding: '0 20px',
-    // boxShadow: '-2px 0 10px 1px #0008',
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
     overflow: 'hidden',
     '-webkit-app-region': 'no-drag',
+
+    '&.hidden': {
+      minHeight: 0,
+      height: 0
+    },
+
+    '&:not(.expandedView)': {
+      background: '#fff1'
+    },
 
     '&.expandedView': {
       height: '100%',
@@ -56,7 +65,11 @@ const useStyle = makeStyles({
       maxHeight: 'unset',
       flexDirection: 'column',
       position: 'fixed',
+      WebkitAppRegion: 'drag',
 
+      '& > *': {
+        WebkitAppRegion: 'no-drag'
+      },
       '& $albumArt': {
         height: '90%',
         width: '90%',
@@ -85,7 +98,8 @@ const useStyle = makeStyles({
         }
       },
       '& $infoContainer': {
-        flexGrow: 'unset'
+        flexGrow: 'unset',
+        alignSelf: 'stretch'
       }
     }
   },
@@ -170,7 +184,6 @@ const useStyle = makeStyles({
   infoContainer: {
     flexGrow: 1,
     flexDirection: 'column',
-    alignSelf: 'stretch',
     overflow: 'hidden',
     marginTop: 10,
     '& $songInfo, & > div': {
@@ -201,17 +214,22 @@ const useStyle = makeStyles({
   progessSlider: {},
   volumeContainer: {
     display: 'flex',
-    marginRight: 10,
-    '& svg': {
+
+    '& button': {
+      background: 'transparent',
+      minWidth: 30,
+      margin: 0,
       marginRight: 10,
-      width: 24
-    },
-    '& > :not(last-child)': {
-      marginRight: 5
+      '& svg': {
+        width: 24
+      }
     }
   },
   volumeSlider: {
-    width: 100
+    minHeight: 100
+  },
+  tooltip: {
+    padding: '15px 5px 10px'
   },
   separator: {
     height: 6,
@@ -245,6 +263,7 @@ const Player = ({
   useEffect(() => {
     if (activeSong && activeSong.location) {
       parseFile(activeSong.location).then(metaData => {
+        document.title = metaData.common.title || 'Song';
         setSongInfo(metaData);
       });
     }
@@ -304,6 +323,12 @@ const Player = ({
       player.current.addEventListener('ended', () => {
         playNextSong();
       });
+      player.current.addEventListener('play', () => {
+        playSong();
+      });
+      player.current.addEventListener('pause', () => {
+        pauseSong();
+      });
       player.current.play();
     });
   };
@@ -342,7 +367,7 @@ const Player = ({
   };
 
   return (
-    <div className={clsx(classes.root, { expandedView })}>
+    <div className={clsx(classes.root, { expandedView, hidden: !activeSong })}>
       <div className={classes.backgroundContainer}>
         <div
           className={classes.background}
@@ -398,17 +423,25 @@ const Player = ({
                 <div className={classes.songInfo}>
                   <p>{songInfo.common.title}</p>
                   <div className={classes.separator} />
-                  <p>{songInfo.common.artists}</p>
+                  <p>{songInfo.common.artists} sjjhvasj c</p>
                 </div>
               ) : null}
               <div className={classes.volumeContainer}>
-                {getVolumeIcon()}
-                <Slider
-                  classes={{ root: classes.volumeSlider }}
-                  value={volume * 100}
-                  onChange={handleChange}
-                  aria-labelledby="continuous-slider"
-                />
+                <Tooltip
+                  interactive
+                  classes={{ tooltip: classes.tooltip }}
+                  title={
+                    <Slider
+                      classes={{ root: classes.volumeSlider }}
+                      orientation="vertical"
+                      value={volume * 100}
+                      onChange={handleChange}
+                      aria-labelledby="continuous-slider"
+                    />
+                  }
+                >
+                  <Button onClick={() => {}}>{getVolumeIcon()}</Button>
+                </Tooltip>
               </div>
             </div>
             <div className={classes.songPlaybackProgress}>
