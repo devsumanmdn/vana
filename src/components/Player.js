@@ -92,7 +92,7 @@ const useStyle = makeStyles({
         height: '3.2em',
         width: '3.2em',
         marginRight: 20,
-        padding: 10,
+        padding: 0,
         '& > svg': {
           fontSize: '1.6em'
         }
