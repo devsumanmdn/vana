@@ -31,7 +31,7 @@ function renderFrame({ dataArray, analyser, WIDTH, HEIGHT, bufferLength }) {
     ctx.fillStyle = `rgb(${r},${g},${b})`;
     ctx.fillRect(x, HEIGHT - barHeight, barWidth - 1, barHeight);
 
-    x += barWidth + 1;
+    x += barWidth;
   }
 }
 
