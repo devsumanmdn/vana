@@ -31,40 +31,8 @@ import { settingsPropType } from '../redux/settings/settingsReducer';
 const useStyles = makeStyles({
   '@global': {
     body: {
-      fontFamily: 'Sans Serif',
-      margin: 0,
-      height: '100vh',
-      transitionDuration: '0.2s',
-      overflow: 'hidden',
-      borderRadius: 6,
       background: ({ transparentMode, backgroundColor = '#444' }) =>
-        transparentMode ? 'transparent' : backgroundColor,
-
-      '& #root': {
-        borderRadius: 6,
-        position: 'relative',
-        minHeight: '100%'
-      },
-
-      '&:hover': {
-        boxShadow: '0 0 3px 1px #aaa4 inset',
-        '&$draggable': {
-          opacity: 1
-        }
-      }
-    },
-    '*::-webkit-scrollbar': {
-      width: 8
-    },
-    '*::-webkit-scrollbar-track': {
-      // boxShadow: 'inset 0 0 6px rgba(0,0,0,0.3)',
-      backgroundColor: 'transparent'
-    },
-
-    '*::-webkit-scrollbar-thumb': {
-      backgroundColor: '#4444',
-      outline: '1px solid slategrey',
-      borderRadius: 4
+        transparentMode ? 'transparent' : backgroundColor
     }
   },
   container: {
