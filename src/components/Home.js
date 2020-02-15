@@ -126,7 +126,7 @@ const Row = memo(({ data, index, style }) => {
 }, areEqual);
 
 Row.propTypes = {
-  data: PropTypes.shape().isRequired,
+  data: PropTypes.arrayOf(PropTypes.shape()).isRequired,
   index: PropTypes.number.isRequired,
   style: PropTypes.shape().isRequired
 };

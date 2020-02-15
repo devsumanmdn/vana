@@ -28,6 +28,7 @@ import {
 } from '../redux/player/playerActions';
 import parseFile from '../util/parseFile';
 import { settingsPropType } from '../redux/settings/settingsReducer';
+import initiateAnalyser from './visualizer';
 
 const fs = window.require('fs');
 
@@ -257,6 +258,7 @@ const Player = ({
   const [songInfo, setSongInfo] = useState(null);
   const [totalDuration, setTotalDuration] = useState();
   const [playedDuration, setPlayedDuration] = useState();
+  const canvasRef = useRef();
 
   const [volume, setVolume] = React.useState(30);
 
@@ -269,7 +271,7 @@ const Player = ({
     }
   }, [activeSong]);
 
-  const handleChange = (event, newVolume) => {
+  const handleVolumeChange = (event, newVolume) => {
     if (player.current) {
       player.current.volume = newVolume / 100;
     }
@@ -284,9 +286,9 @@ const Player = ({
 
   useEffect(() => {
     if (player.current) {
-      if (playerState.playing) {
+      if (player.current.paused && playerState.playing) {
         player.current.play();
-      } else {
+      } else if (!player.current.paused && !playerState.playing) {
         player.current.pause();
       }
     }
@@ -299,18 +301,9 @@ const Player = ({
   };
 
   const play = () => {
-    if (player.current !== null) {
-      player.current.pause();
-    }
-
-    fs.readFile(activeSong.location, (err, data) => {
-      const songDataURL =
-        songInfo && songInfo.format
-          ? `data:audio/${songInfo.format.codec.toLowerCase()};base64,${data.toString(
-              'base64'
-            )}`
-          : null;
-      player.current = new Audio(songDataURL);
+    const createPlayer = () => {
+      player.current = new Audio();
+      initiateAnalyser(player.current, canvasRef.current);
       player.current.addEventListener('loadeddata', () => {
         setTotalDuration(player.current.duration);
       });
@@ -329,6 +322,20 @@ const Player = ({
       player.current.addEventListener('pause', () => {
         pauseSong();
       });
+    };
+
+    fs.readFile(activeSong.location, (err, data) => {
+      const songDataURL =
+        songInfo && songInfo.format
+          ? `data:audio/${songInfo.format.codec.toLowerCase()};base64,${data.toString(
+              'base64'
+            )}`
+          : null;
+      if (player.current === null) {
+        createPlayer();
+      }
+
+      player.current.src = songDataURL;
       player.current.play();
     });
   };
@@ -368,6 +375,16 @@ const Player = ({
 
   return (
     <div className={clsx(classes.root, { expandedView, hidden: !activeSong })}>
+      <canvas
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: -1,
+          opacity: 0.6
+        }}
+        ref={canvasRef}
+      />
       <div className={classes.backgroundContainer}>
         <div
           className={classes.background}
@@ -435,7 +452,7 @@ const Player = ({
                       classes={{ root: classes.volumeSlider }}
                       orientation="vertical"
                       value={volume * 100}
-                      onChange={handleChange}
+                      onChange={handleVolumeChange}
                       aria-labelledby="continuous-slider"
                     />
                   }
@@ -446,7 +463,7 @@ const Player = ({
             </div>
             <div className={classes.songPlaybackProgress}>
               <span>
-                {moment.duration(totalDuration, 'seconds').format('mm:ss', {
+                {moment.duration(playedDuration, 'seconds').format('mm:ss', {
                   trim: false
                 })}
               </span>
@@ -458,7 +475,7 @@ const Player = ({
                 onChangeCommitted={() => playSong()}
               />
               <span>
-                {moment.duration(playedDuration, 'seconds').format('mm:ss', {
+                {moment.duration(totalDuration, 'seconds').format('mm:ss', {
                   trim: false
                 })}
               </span>

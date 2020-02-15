@@ -74,17 +74,13 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
 
   return songInfo ? (
     <div
-      role={'presentation'}
+      role="presentation"
       onClick={handlePlayPause}
       className={classes.root}
       {...rest}
     >
-      <img
-        className={classes.albumArt}
-        src={albumArtDataURL}
-        alt={'albumArt'}
-      />
-      <button type={'button'} className={classes.playBtn}>
+      <img className={classes.albumArt} src={albumArtDataURL} alt="albumArt" />
+      <button type="button" className={classes.playBtn}>
         {playing ? <PauseRounded /> : <PlayArrowRounded />}
       </button>
       <p>{songInfo.common.title}</p>
