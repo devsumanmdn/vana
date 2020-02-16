@@ -51,8 +51,10 @@ const initiateAnalyser = (audio, canvas) => {
 
   const resizeCanvas = () => {
     if (canvas) {
+      /* eslint-disable no-param-reassign */
       canvas.height = window.innerHeight;
       canvas.width = window.innerWidth;
+      /* eslint-enable no-param-reassign */
       ctx = canvas.getContext('2d');
       const WIDTH = canvas.width;
       const HEIGHT = canvas.height;
