@@ -1,6 +1,7 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import thunk from 'redux-thunk';
 import { remote } from 'electron';
+import throttle from 'lodash/throttle';
 
 import player from './player/playerReducer';
 import songs from './songs/songsReducer';
@@ -42,8 +43,10 @@ const store = createStore(
   composeEnhancers(enhancer)
 );
 
-store.subscribe(() => {
-  stateStore.set(undefined, store.getState());
-});
+store.subscribe(
+  throttle(() => {
+    stateStore.set(undefined, store.getState());
+  }, 1000)
+);
 
 export default store;

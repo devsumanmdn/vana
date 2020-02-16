@@ -300,7 +300,7 @@ const Player = ({
     }
   };
 
-  const play = () => {
+  const loadSong = () => {
     const createPlayer = () => {
       player.current = new Audio();
       initiateAnalyser(player.current, canvasRef.current);
@@ -336,7 +336,9 @@ const Player = ({
       }
 
       player.current.src = songDataURL;
-      player.current.play();
+      if (playerState.playing) {
+        player.current.play();
+      }
     });
   };
 
@@ -350,7 +352,7 @@ const Player = ({
 
   useEffect(() => {
     if (songInfo) {
-      play();
+      loadSong();
     }
     return pause;
   }, [songInfo]);
