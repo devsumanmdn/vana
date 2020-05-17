@@ -21,12 +21,12 @@ const createWindow = () => {
     minHeight: 500,
     frame: false,
     titleBarStyle: 'customButtonsOnHover',
-    transparent: true,
+    // transparent: true,
     // alwaysOnTop: true,
     webPreferences: {
       devTools: isDev,
-      nodeIntegration: true
-    }
+      nodeIntegration: true,
+    },
   });
 
   // and load the index.html of the app.

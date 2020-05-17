@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 
 import {
   playSong as playSongAction,
-  pauseSong as pauseSongAction
+  pauseSong as pauseSongAction,
 } from '../redux/player/playerActions';
 import parseFile from '../util/parseFile';
 
@@ -21,8 +21,8 @@ const useStyles = makeStyles({
     color: 'lightgrey',
     cursor: 'default',
     '&:hover': {
-      color: 'white'
-    }
+      color: 'white',
+    },
   },
   playBtn: {
     backgroundColor: 'transparent',
@@ -40,14 +40,14 @@ const useStyles = makeStyles({
     outline: 'none',
     cursor: 'pointer',
     '& > svg': {
-      fontSize: 18
-    }
+      fontSize: 18,
+    },
   },
   albumArt: {
     height: 40,
     width: 40,
-    marginRight: 20
-  }
+    marginRight: 20,
+  },
 });
 
 function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
@@ -97,20 +97,20 @@ SongListItem.propTypes = {
     location: PropTypes.string,
     id: PropTypes.string,
     title: PropTypes.string,
-    albumArt: PropTypes.string
+    albumArt: PropTypes.string,
   }).isRequired,
   playing: PropTypes.bool.isRequired,
   playSong: PropTypes.func.isRequired,
-  pauseSong: PropTypes.func.isRequired
+  pauseSong: PropTypes.func.isRequired,
 };
 
 const mapDispatchToProps = {
   playSong: playSongAction,
-  pauseSong: pauseSongAction
+  pauseSong: pauseSongAction,
 };
 
 const mapStateToProps = ({ player }, ownProps) => ({
-  playing: ownProps.metaData.id === player.activeSongId && player.playing
+  playing: !!(ownProps.metaData.id === player.activeSongId && player.playing),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(SongListItem);

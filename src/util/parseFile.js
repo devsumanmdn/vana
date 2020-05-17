@@ -1,7 +1,7 @@
 import * as mm from 'music-metadata';
 
-export default location =>
-  mm.parseFile(location).then(parsedData => {
+export default (location) =>
+  mm.parseFile(location).then((parsedData) => {
     const info = { ...parsedData };
     if (!(info.common && info.common.title)) {
       const filename = location.split('/').slice(-1)[0];

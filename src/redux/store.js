@@ -9,6 +9,7 @@ import playlists from './playlists/playlistsReducer';
 import settings from './settings/settingsReducer';
 
 import JSONStore from './JSONStore';
+import playerMiddleware from './playerMiddleware';
 
 const stateStore = new JSONStore({ fileName: 'state' });
 
@@ -18,10 +19,10 @@ const rootReducer = combineReducers({
   player,
   songs,
   playlists,
-  settings
+  settings,
 });
 
-const middlewares = [thunk];
+const middlewares = [thunk, playerMiddleware];
 
 const enhancers = [];
 
@@ -35,13 +36,22 @@ const composeEnhancers =
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
   compose;
 
-const initialState = persistedState;
+const initialState = { ...persistedState };
+
+if (persistedState && persistedState.player && persistedState.player) {
+  initialState.player.playing = false;
+}
 
 const store = createStore(
   rootReducer,
   initialState,
   composeEnhancers(enhancer)
 );
+
+export const resetAll = () => {
+  stateStore.set(undefined, {});
+  window.location.reload();
+};
 
 store.subscribe(
   throttle(() => {

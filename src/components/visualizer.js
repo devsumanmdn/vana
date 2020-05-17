@@ -10,7 +10,7 @@ function renderFrame({ dataArray, analyser, WIDTH, HEIGHT, bufferLength }) {
       analyser,
       WIDTH,
       HEIGHT,
-      bufferLength
+      bufferLength,
     })
   );
 
@@ -22,7 +22,7 @@ function renderFrame({ dataArray, analyser, WIDTH, HEIGHT, bufferLength }) {
   }
 
   for (let i = 0; i < bufferLength; i += 1) {
-    barHeight = (dataArray[i] / 256) * 100;
+    barHeight = (dataArray[i] / 256) * (window.maxBarHeight || 100);
 
     const r = barHeight + 25 * (i / bufferLength);
     const g = 200 * (i / bufferLength);
@@ -35,7 +35,8 @@ function renderFrame({ dataArray, analyser, WIDTH, HEIGHT, bufferLength }) {
   }
 }
 
-const initiateAnalyser = (audio, canvas) => {
+const initiateAnalyser = (audio) => {
+  const canvas = document.getElementById('player-visualization');
   const context = new AudioContext();
   const src = context.createMediaElementSource(audio);
   const analyser = context.createAnalyser();

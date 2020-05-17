@@ -39,4 +39,8 @@
 	},
 	"gitlens.keymap": "alternate",
 	"git.autofetch": true,
+	"cSpell.words": [
+		"clsx",
+		"nesw"
+	],
 }

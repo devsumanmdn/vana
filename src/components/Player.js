@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import makeStyles from '@material-ui/styles/makeStyles';
@@ -23,14 +23,16 @@ import {
   pauseSong as pauseSongAction,
   resumeSong as resumeSongAction,
   playNextSong as playNextSongAction,
-  playPrevSong as playPrevSongAction
+  playPrevSong as playPrevSongAction,
+  prepareSong as prepareSongAction,
   // setTotalDuration as setTotalDurationAction
 } from '../redux/player/playerActions';
+import {
+  seekPlayer,
+  setPlayerVolume as setPlayerVolumeAction,
+} from '../redux/playerMiddleware/playerMiddleWareActions';
 import parseFile from '../util/parseFile';
 import { settingsPropType } from '../redux/settings/settingsReducer';
-import initiateAnalyser from './visualizer';
-
-const fs = window.require('fs');
 
 momentDurationFormatSetup(moment);
 
@@ -50,11 +52,11 @@ const useStyle = makeStyles({
 
     '&.hidden': {
       minHeight: 0,
-      height: 0
+      height: 0,
     },
 
     '&:not(.expandedView)': {
-      background: '#fff1'
+      background: '#fff1',
     },
 
     '&.expandedView': {
@@ -69,14 +71,14 @@ const useStyle = makeStyles({
       WebkitAppRegion: 'drag',
 
       '& > *': {
-        WebkitAppRegion: 'no-drag'
+        WebkitAppRegion: 'no-drag',
       },
       '& $albumArt': {
         height: '90%',
         width: '90%',
         maxWidth: 'calc(100vh - 200px)',
         maxHeight: 'calc(100vh - 300px)',
-        margin: '20px'
+        margin: '20px',
       },
 
       '& $volumeContainer': {
@@ -86,8 +88,8 @@ const useStyle = makeStyles({
       '& $songInfo': {
         '& > p': {
           fontSize: '1.1em',
-          margin: '0 10px'
-        }
+          margin: '0 10px',
+        },
       },
       '& $playBtn': {
         height: '3.2em',
@@ -95,14 +97,14 @@ const useStyle = makeStyles({
         marginRight: 20,
         padding: 0,
         '& > svg': {
-          fontSize: '1.6em'
-        }
+          fontSize: '1.6em',
+        },
       },
       '& $infoContainer': {
         flexGrow: 'unset',
-        alignSelf: 'stretch'
-      }
-    }
+        alignSelf: 'stretch',
+      },
+    },
   },
   backgroundContainer: ({ transparentMode }) => ({
     position: 'fixed',
@@ -112,15 +114,15 @@ const useStyle = makeStyles({
           top: 30,
           left: 30,
           height: 'calc(100% - 60px)',
-          width: 'calc(100% - 60px)'
+          width: 'calc(100% - 60px)',
         }
       : {
           top: 0,
           left: 0,
           height: '100%',
           width: '100%',
-          backgroundColor: '#000'
-        })
+          backgroundColor: '#000',
+        }),
   }),
   background: {
     height: '100%',
@@ -133,7 +135,7 @@ const useStyle = makeStyles({
     transition: 'background-image 1.5s .5s',
     willChange: 'background-image',
     backgroundColor: '#0008',
-    borderRadius: 6
+    borderRadius: 6,
   },
   albumArt: {
     height: 50,
@@ -146,11 +148,11 @@ const useStyle = makeStyles({
     backgroundColor: 'transparent',
     transition: 'background-image 1s .3s',
     willChange: 'background-image',
-    cursor: 'nesw-resize'
+    cursor: 'nesw-resize',
   },
   songNavigation: {
     display: 'flex',
-    margin: '20px 10px'
+    margin: '20px 10px',
   },
   playBtn: {
     backgroundColor: 'transparent',
@@ -168,19 +170,19 @@ const useStyle = makeStyles({
     cursor: 'pointer',
 
     '&.playPause': {
-      border: '1px solid #fff'
+      border: '1px solid #fff',
     },
 
     '&:hover': {
       '& > svg': {
-        transform: 'scale(1.09)'
-      }
+        transform: 'scale(1.09)',
+      },
     },
 
     '& > svg': {
       fontSize: '1.4em',
-      transition: 'transform 0.3s'
-    }
+      transition: 'transform 0.3s',
+    },
   },
   infoContainer: {
     flexGrow: 1,
@@ -191,9 +193,9 @@ const useStyle = makeStyles({
       display: 'flex',
       alignItems: 'center',
       '& > *': {
-        whiteSpace: 'nowrap'
-      }
-    }
+        whiteSpace: 'nowrap',
+      },
+    },
   },
   songInfo: {
     flexGrow: 1,
@@ -203,16 +205,16 @@ const useStyle = makeStyles({
       margin: '0 10px',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis'
-    }
+      textOverflow: 'ellipsis',
+    },
   },
   songPlaybackProgress: {
     '& > *': {
       margin: 10,
-      alignItems: 'center'
-    }
+      alignItems: 'center',
+    },
   },
-  progessSlider: {},
+  progressSlider: {},
   volumeContainer: {
     display: 'flex',
 
@@ -222,15 +224,15 @@ const useStyle = makeStyles({
       margin: 0,
       marginRight: 10,
       '& svg': {
-        width: 24
-      }
-    }
+        width: 24,
+      },
+    },
   },
   volumeSlider: {
-    minHeight: 100
+    minHeight: 100,
   },
   tooltip: {
-    padding: '15px 5px 10px'
+    padding: '15px 5px 10px',
   },
   separator: {
     height: 6,
@@ -238,33 +240,41 @@ const useStyle = makeStyles({
     minWidth: 6,
     borderRadius: '50%',
     backgroundColor: '#fff2',
-    margin: '4px 8px'
-  }
+    margin: '4px 8px',
+  },
 });
 
 const Player = ({
   activeSong,
   playerState,
-  playSong,
   pauseSong,
   playNextSong,
   playPrevSong,
   expandedView,
-  setExpadedView,
-  settings
+  setExpandedView,
+  settings,
+  seek,
+  resumeSong,
+  setPlayerVolume,
+  prepareSong,
 }) => {
   const classes = useStyle(settings);
-  const player = useRef(null);
   const [songInfo, setSongInfo] = useState(null);
-  const [totalDuration, setTotalDuration] = useState();
-  const [playedDuration, setPlayedDuration] = useState();
-  const canvasRef = useRef();
-
-  const [volume, setVolume] = React.useState(30);
+  const { totalDuration, playedDuration, volume } = playerState;
 
   useEffect(() => {
     if (activeSong && activeSong.location) {
-      parseFile(activeSong.location).then(metaData => {
+      parseFile(activeSong.location).then((metaData) => {
+        document.title = metaData.common.title || 'Song';
+        const codec = metaData && metaData.format && metaData.format.container;
+        prepareSong({ location: activeSong.location, codec });
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeSong && activeSong.location) {
+      parseFile(activeSong.location).then((metaData) => {
         document.title = metaData.common.title || 'Song';
         setSongInfo(metaData);
       });
@@ -272,90 +282,24 @@ const Player = ({
   }, [activeSong]);
 
   const handleVolumeChange = (event, newVolume) => {
-    if (player.current) {
-      player.current.volume = newVolume / 100;
-    }
+    setPlayerVolume(newVolume / 100);
   };
 
   const handleSeek = (event, newValue) => {
-    if (player.current) {
+    if (playerState.playing) {
       pauseSong();
-      player.current.currentTime = totalDuration * (newValue / 100);
     }
-  };
-
-  useEffect(() => {
-    if (player.current) {
-      if (player.current.paused && playerState.playing) {
-        player.current.play();
-      } else if (!player.current.paused && !playerState.playing) {
-        player.current.pause();
-      }
-    }
-  }, [playerState.playing]);
-
-  const pause = () => {
-    if (player.current) {
-      player.current.pause();
-    }
-  };
-
-  const loadSong = () => {
-    const createPlayer = () => {
-      player.current = new Audio();
-      initiateAnalyser(player.current, canvasRef.current);
-      player.current.addEventListener('loadeddata', () => {
-        setTotalDuration(player.current.duration);
-      });
-      player.current.addEventListener('timeupdate', () => {
-        setPlayedDuration(player.current.currentTime);
-      });
-      player.current.addEventListener('volumechange', () => {
-        setVolume(player.current.volume);
-      });
-      player.current.addEventListener('ended', () => {
-        playNextSong();
-      });
-      player.current.addEventListener('play', () => {
-        playSong();
-      });
-      player.current.addEventListener('pause', () => {
-        pauseSong();
-      });
-    };
-
-    fs.readFile(activeSong.location, (err, data) => {
-      const songDataURL =
-        songInfo && songInfo.format
-          ? `data:audio/${songInfo.format.codec.toLowerCase()};base64,${data.toString(
-              'base64'
-            )}`
-          : null;
-      if (player.current === null) {
-        createPlayer();
-      }
-
-      player.current.src = songDataURL;
-      if (playerState.playing) {
-        player.current.play();
-      }
-    });
+    const seekDur = totalDuration * (newValue / 100);
+    seek(seekDur);
   };
 
   const handlePlayPause = () => {
     if (playerState.playing) {
       pauseSong();
     } else {
-      playSong();
+      resumeSong();
     }
   };
-
-  useEffect(() => {
-    if (songInfo) {
-      loadSong();
-    }
-    return pause;
-  }, [songInfo]);
 
   const { playing } = playerState;
 
@@ -383,15 +327,15 @@ const Player = ({
           top: 0,
           left: 0,
           zIndex: -1,
-          opacity: 0.6
+          opacity: 0.6,
         }}
-        ref={canvasRef}
+        id="player-visualization"
       />
       <div className={classes.backgroundContainer}>
         <div
           className={classes.background}
           style={{
-            backgroundImage: `url(${albumArtDataURL}`
+            backgroundImage: `url(${albumArtDataURL}`,
           }}
         />
       </div>
@@ -400,7 +344,7 @@ const Player = ({
           {songInfo ? (
             <div
               role="presentation"
-              onClick={() => setExpadedView(!expandedView)}
+              onClick={() => setExpandedView(!expandedView)}
               className={classes.albumArt}
               style={{ backgroundImage: `url(${albumArtDataURL}` }}
               alt="albumArt"
@@ -408,7 +352,7 @@ const Player = ({
           ) : (
             <div
               role="presentation"
-              onClick={() => setExpadedView(!expandedView)}
+              onClick={() => setExpandedView(!expandedView)}
               className={classes.albumArt}
               style={{ background: '#000' }}
             />
@@ -466,19 +410,19 @@ const Player = ({
             <div className={classes.songPlaybackProgress}>
               <span>
                 {moment.duration(playedDuration, 'seconds').format('mm:ss', {
-                  trim: false
+                  trim: false,
                 })}
               </span>
               <Slider
-                classes={{ root: classes.progessSlider }}
+                classes={{ root: classes.progressSlider }}
                 value={(playedDuration / totalDuration) * 100}
                 aria-labelledby="continuous-slider"
                 onChange={handleSeek}
-                onChangeCommitted={() => playSong()}
+                onChangeCommitted={() => resumeSong()}
               />
               <span>
                 {moment.duration(totalDuration, 'seconds').format('mm:ss', {
-                  trim: false
+                  trim: false,
                 })}
               </span>
             </div>
@@ -491,25 +435,33 @@ const Player = ({
 
 Player.propTypes = {
   playerState: PropTypes.shape({
-    playing: PropTypes.bool
+    playing: PropTypes.bool,
+    volume: PropTypes.number,
+    isMute: PropTypes.bool,
+    totalDuration: PropTypes.number,
+    playedDuration: PropTypes.number,
   }).isRequired,
   activeSong: PropTypes.shape({
     codec: PropTypes.string,
     title: PropTypes.string,
     location: PropTypes.string,
-    albumArt: PropTypes.string
+    albumArt: PropTypes.string,
   }),
   expandedView: PropTypes.bool.isRequired,
-  setExpadedView: PropTypes.func.isRequired,
-  playSong: PropTypes.func.isRequired,
+  setExpandedView: PropTypes.func.isRequired,
+  // playSong: PropTypes.func.isRequired,
   pauseSong: PropTypes.func.isRequired,
+  resumeSong: PropTypes.func.isRequired,
   playNextSong: PropTypes.func.isRequired,
   playPrevSong: PropTypes.func.isRequired,
-  settings: settingsPropType.isRequired
+  seek: PropTypes.func.isRequired,
+  setPlayerVolume: PropTypes.func.isRequired,
+  prepareSong: PropTypes.func.isRequired,
+  settings: settingsPropType.isRequired,
 };
 
 Player.defaultProps = {
-  activeSong: null
+  activeSong: null,
 };
 
 const mapStateToProps = ({ settings }) => ({ settings });
@@ -519,7 +471,10 @@ const mapDispatchToProps = {
   pauseSong: pauseSongAction,
   resumeSong: resumeSongAction,
   playNextSong: playNextSongAction,
-  playPrevSong: playPrevSongAction
+  playPrevSong: playPrevSongAction,
+  seek: seekPlayer,
+  setPlayerVolume: setPlayerVolumeAction,
+  prepareSong: prepareSongAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Player);

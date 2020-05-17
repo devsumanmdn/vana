@@ -2,18 +2,23 @@
 import {
   ADD_SONGS_TO_QUEUE,
   CLEAR_QUEUE,
-  REMOVE_SONGS_TO_QUEUE,
-  PLAY_NEXT_SONG,
-  PLAY_PREV_SONG,
-  PLAY_SONG,
-  RESUME_SONG,
-  PAUSE_SONG
+  REMOVE_SONGS_FROM_QUEUE,
+  SET_TOTAL_DURATION,
+  SET_PLAYED_DURATION,
+  SET_VOLUME,
+  TOGGLE_MUTE,
+  SET_ACTIVE_SONG,
+  SET_PLAYING,
 } from './playerActionTypes';
 
 const initialState = {
   queue: [],
   activeSongId: '',
-  playing: false
+  playing: false,
+  totalDuration: 0,
+  playedDuration: 0,
+  volume: 80,
+  isMute: false,
 };
 
 const playerReducer = (state = initialState, action) => {
@@ -23,77 +28,48 @@ const playerReducer = (state = initialState, action) => {
       return {
         ...state,
         queue: [...new Set([...state.queue, ...payload])],
-        ...(!state.activeSongId && { activeSongId: payload[0] })
+        ...(!state.activeSongId && { activeSongId: payload[0] }),
       };
     case CLEAR_QUEUE:
       return {
         ...state,
         activeSongId: '',
-        queue: []
+        queue: [],
       };
-    case REMOVE_SONGS_TO_QUEUE:
+    case REMOVE_SONGS_FROM_QUEUE:
       return {
         ...state,
-        queue: state.queue.filter(songId => !payload.includes(songId))
+        queue: state.queue.filter((songId) => !payload.includes(songId)),
       };
-    case PLAY_SONG:
+    case SET_ACTIVE_SONG:
       return {
         ...state,
-        ...(!!payload && {
-          queue: [...new Set([...state.queue, payload])],
-          activeSongId: payload
-        }),
-
-        playing: true
+        activeSongId: payload,
       };
-    case PLAY_NEXT_SONG: {
-      if (state.queue.length === 0) {
-        return state;
-      }
-
-      const presentActiveSongIndex = state.queue.findIndex(
-        songId => songId === state.activeSongId
-      );
-      const nextSongIndex =
-        presentActiveSongIndex !== -1 &&
-        presentActiveSongIndex < state.queue.length - 1
-          ? presentActiveSongIndex + 1
-          : 0;
-      const activeSongId = state.queue[nextSongIndex] || '';
+    case SET_PLAYING:
       return {
         ...state,
-        activeSongId,
-        playing: true
+        playing: payload,
       };
-    }
-    case PLAY_PREV_SONG: {
-      if (state.queue.length === 0) {
-        return state;
-      }
-
-      const presentActiveSongIndex = state.queue.findIndex(
-        songId => songId === state.activeSongId
-      );
-      const prevSongIndex =
-        presentActiveSongIndex !== -1 ? presentActiveSongIndex - 1 : 0;
+    case SET_TOTAL_DURATION:
       return {
         ...state,
-        activeSongId:
-          state.queue[
-            prevSongIndex > -1 ? prevSongIndex : state.queue.length - 1
-          ],
-        playing: true
+        totalDuration: payload,
       };
-    }
-    case RESUME_SONG:
+    case SET_PLAYED_DURATION:
       return {
         ...state,
-        playing: true
+        playedDuration: payload,
       };
-    case PAUSE_SONG:
+    case SET_VOLUME:
       return {
         ...state,
-        playing: false
+        volume: payload,
+      };
+    case TOGGLE_MUTE:
+      return {
+        ...state,
+        isMute: !state.isMute,
       };
     default:
       return state;
