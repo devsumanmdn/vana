@@ -1,19 +1,21 @@
-export default array => {
-  let currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
+export default (array) => {
+  let currentIndex = array.length;
+  let temporaryValue;
+  let randomIndex;
+
+  const result = [...array];
 
   // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
+  while (currentIndex !== 0) {
     // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex -= 1;
 
     // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
+    temporaryValue = result[currentIndex];
+    result[currentIndex] = result[randomIndex];
+    result[randomIndex] = temporaryValue;
   }
 
-  return array;
+  return result;
 };

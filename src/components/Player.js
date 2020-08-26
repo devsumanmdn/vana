@@ -270,6 +270,12 @@ const Player = ({
         prepareSong({ location: activeSong.location, codec });
       });
     }
+    if ('mediaSession' in navigator) {
+      // navigator.mediaSession.setActionHandler('play', );
+      // navigator.mediaSession.setActionHandler('pause', );
+      navigator.mediaSession.setActionHandler('previoustrack', playPrevSong);
+      navigator.mediaSession.setActionHandler('nexttrack', playNextSong);
+    }
   }, []);
 
   useEffect(() => {
@@ -277,6 +283,21 @@ const Player = ({
       parseFile(activeSong.location).then((metaData) => {
         document.title = metaData.common.title || 'Song';
         setSongInfo(metaData);
+
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: metaData.common.title,
+            artist: metaData.common.artist,
+            album: metaData.common.album,
+            artwork: [
+              {
+                src: metaData.albumArt,
+                sizes: '512x512',
+                type: 'image/png',
+              },
+            ],
+          });
+        }
       });
     }
   }, [activeSong]);
