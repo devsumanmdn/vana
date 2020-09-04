@@ -27,6 +27,7 @@ import getArrayOfFiles from '../util/getArrayOfFiles';
 // import { toggleSettingsModal as toggleSettingsModalAction } from '../redux/settings/settingsActions';
 import { settingsPropType } from '../redux/settings/settingsReducer';
 import { resetAll } from '../redux/store';
+import { loadSong } from '../redux/playerMiddleware/playerMiddleWareActions';
 
 // const Button = props => <MUIButton variant="outlined" {...props} />;
 
@@ -155,7 +156,7 @@ const Home = ({
     const songIds = shuffle([...Object.values(allSongs).map(({ id }) => id)]);
     addSongsToQueue(songIds);
     if (songIds[0]) {
-      playSong(songIds[0]);
+      playSong(songIds[0], true);
     }
   };
 

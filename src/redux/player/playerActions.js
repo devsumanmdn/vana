@@ -73,13 +73,16 @@ export const prepareSong = ({ location, codec, play = false }) => (
   return Promise.resolve();
 };
 
-export const playSong = (songId) => async (dispatch, getState) => {
+export const playSong = (songId, load = false) => async (
+  dispatch,
+  getState
+) => {
   const state = getState();
   const {
     player: { queue = [] },
   } = getState();
 
-  if (songId === state.player.activeSongId) {
+  if (songId === state.player.activeSongId && !load) {
     return dispatch(resumeSong());
   }
 
