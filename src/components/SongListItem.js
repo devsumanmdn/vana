@@ -55,8 +55,12 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }) {
 
   useState(() => {
     (async () => {
-      const info = await parseFile(metaData.location);
-      setSongInfo(info);
+      const info = await parseFile(metaData.location).catch((e) => {
+        alert(e.message);
+      });
+      if (info) {
+        setSongInfo(info);
+      }
     })();
   }, [metaData.location]);
 

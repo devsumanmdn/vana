@@ -48,7 +48,8 @@ const useStyle = makeStyles({
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
     overflow: 'hidden',
-    '-webkit-app-region': 'no-drag',
+    marginTop: '55px',
+    marginBottom: '-55px',
 
     '&.hidden': {
       minHeight: 0,
@@ -57,10 +58,12 @@ const useStyle = makeStyles({
 
     '&:not(.expandedView)': {
       background: '#fff1',
+      marginTop: 0,
+      marginBottom: 0,
     },
 
     '&.expandedView': {
-      height: '100%',
+      height: 'calc(100% - 55px)',
       width: '100%',
       padding: '10px 20px',
       top: 0,
@@ -73,6 +76,7 @@ const useStyle = makeStyles({
       '& > *': {
         WebkitAppRegion: 'no-drag',
       },
+
       '& $albumArt': {
         height: '90%',
         width: '90%',
@@ -153,6 +157,12 @@ const useStyle = makeStyles({
   songNavigation: {
     display: 'flex',
     margin: '20px 10px',
+    transitionDuration: '0.3s',
+
+    '&.hideControls': {
+      marginBottom: -50,
+      opacity: 0,
+    },
   },
   playBtn: {
     backgroundColor: 'transparent',
@@ -189,6 +199,13 @@ const useStyle = makeStyles({
     flexDirection: 'column',
     overflow: 'hidden',
     marginTop: 10,
+    transitionDuration: '0.3s',
+
+    '&.hideControls': {
+      marginButtom: -50,
+      opacity: 0,
+    },
+
     '& $songInfo, & > div': {
       display: 'flex',
       alignItems: 'center',
@@ -260,6 +277,7 @@ const Player = ({
 }) => {
   const classes = useStyle(settings);
   const [songInfo, setSongInfo] = useState(null);
+  const [controlsTimeout, setControlsTimeout] = useState(false);
   const { totalDuration, playedDuration, volume } = playerState;
 
   useEffect(() => {
@@ -302,6 +320,32 @@ const Player = ({
     }
   }, [activeSong]);
 
+  useEffect(() => {
+    let timeOut;
+
+    const handler = () => {
+      if (timeOut) {
+        clearTimeout(timeOut);
+      }
+
+      timeOut = setTimeout(() => {
+        setControlsTimeout(true);
+      }, 3000);
+      setControlsTimeout(false);
+    };
+
+    window.addEventListener('mousedown', handler);
+    window.addEventListener('mousemove', handler);
+
+    return () => {
+      window.removeEventListener('mousedown', handler);
+      window.removeEventListener('mousemove', handler);
+      if (timeOut) {
+        clearTimeout(timeOut);
+      }
+    };
+  }, []);
+
   const handleVolumeChange = (event, newVolume) => {
     setPlayerVolume(newVolume / 100);
   };
@@ -341,11 +385,17 @@ const Player = ({
   };
 
   return (
-    <div className={clsx(classes.root, { expandedView, hidden: !activeSong })}>
+    <div
+      className={clsx(classes.root, {
+        expandedView,
+        hidden: !activeSong,
+        hideControls: controlsTimeout,
+      })}
+    >
       <canvas
         style={{
           position: 'absolute',
-          top: 0,
+          bottom: 0,
           left: 0,
           zIndex: -1,
           opacity: 0.6,
@@ -378,7 +428,11 @@ const Player = ({
               style={{ background: '#000' }}
             />
           )}
-          <div className={classes.songNavigation}>
+          <div
+            className={clsx(classes.songNavigation, {
+              hideControls: controlsTimeout,
+            })}
+          >
             <button
               type="button"
               onClick={playPrevSong}
@@ -401,7 +455,11 @@ const Player = ({
               <PlayNextIcon />
             </button>
           </div>
-          <div className={classes.infoContainer}>
+          <div
+            className={clsx(classes.infoContainer, {
+              hideControls: controlsTimeout,
+            })}
+          >
             <div>
               {songInfo ? (
                 <div className={classes.songInfo}>

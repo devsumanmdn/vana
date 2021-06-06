@@ -27,7 +27,6 @@ import getArrayOfFiles from '../util/getArrayOfFiles';
 // import { toggleSettingsModal as toggleSettingsModalAction } from '../redux/settings/settingsActions';
 import { settingsPropType } from '../redux/settings/settingsReducer';
 import { resetAll } from '../redux/store';
-import { loadSong } from '../redux/playerMiddleware/playerMiddleWareActions';
 
 // const Button = props => <MUIButton variant="outlined" {...props} />;
 
@@ -167,9 +166,10 @@ const Home = ({
       {/* <Sidebar chooseFolderDialog={chooseFolderDialog} /> */}
       <div className={classes.mainView}>
         <div
-          style={expandedView ? { visibility: 'hidden' } : {}}
+          // style={{ visibility: 'hidden' }}
           className={classes.buttonContainer}
           ref={buttonContainerRef}
+          id="mainActions"
         >
           {/* <Button
             title="Settings"

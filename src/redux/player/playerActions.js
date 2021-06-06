@@ -48,56 +48,59 @@ export const resumeSong = () => (dispatch) => {
   return dispatch(playPlayer());
 };
 
-export const prepareSong = ({ location, codec, play = false }) => (
-  dispatch
-) => {
-  if (location && codec) {
-    return fs.readFile(location, (err, data) => {
-      try {
-        if (err) throw err;
+export const prepareSong =
+  ({ location, codec, play = false }) =>
+  (dispatch) => {
+    if (location && codec) {
+      return fs.readFile(location, (err, data) => {
+        try {
+          if (err) throw err;
 
-        const songDataURL = `data:audio/${codec.toLowerCase()};base64,${data.toString(
-          'base64'
-        )}`;
-        if (songDataURL) {
-          dispatch(loadSong({ songDataURL, play }));
-        } else {
-          throw Error('Unable to construct data URL');
+          const songDataURL = `data:audio/${codec.toLowerCase()};base64,${data.toString(
+            'base64'
+          )}`;
+          if (songDataURL) {
+            dispatch(loadSong({ songDataURL, play }));
+          } else {
+            throw Error('Unable to construct data URL');
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.log(error);
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error);
-      }
+      });
+    }
+    return Promise.resolve();
+  };
+
+export const playSong =
+  (songId, load = false) =>
+  async (dispatch, getState) => {
+    const state = getState();
+    const {
+      player: { queue = [] },
+    } = getState();
+
+    if (songId === state.player.activeSongId && !load) {
+      return dispatch(resumeSong());
+    }
+
+    if (songId && !queue.find((queueSongId) => queueSongId === songId)) {
+      dispatch(addSongsToQueue([songId]));
+    }
+
+    dispatch(setActiveSong(songId));
+
+    const { location } = state.songs.all[songId] || {};
+    const metaData = await parseFile(location).catch((e) => {
+      alert(e.message);
     });
-  }
-  return Promise.resolve();
-};
 
-export const playSong = (songId, load = false) => async (
-  dispatch,
-  getState
-) => {
-  const state = getState();
-  const {
-    player: { queue = [] },
-  } = getState();
-
-  if (songId === state.player.activeSongId && !load) {
-    return dispatch(resumeSong());
-  }
-
-  if (songId && !queue.find((queueSongId) => queueSongId === songId)) {
-    dispatch(addSongsToQueue([songId]));
-  }
-
-  dispatch(setActiveSong(songId));
-
-  const { location } = state.songs.all[songId] || {};
-  const metaData = await parseFile(location);
-
-  const codec = metaData && metaData.format && metaData.format.container;
-  return dispatch(prepareSong({ location, codec, play: true }));
-};
+    if (metaData) {
+      const codec = metaData?.format?.container;
+      return dispatch(prepareSong({ location, codec, play: true }));
+    }
+  };
 
 export const playNextSong = () => (dispatch, getState) => {
   const { player: playerState } = getState();
