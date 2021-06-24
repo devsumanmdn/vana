@@ -7,3 +7,4 @@ export const SET_PLAYED_DURATION = 'SET_PLAYED_DURATION';
 export const SET_VOLUME = 'SET_VOLUME';
 export const TOGGLE_MUTE = 'TOGGLE_MUTE';
 export const SET_PLAYING = 'SET_PLAYING';
+export const SET_SHOW_QUEUE = 'SET_SHOW_QUEUE';

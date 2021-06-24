@@ -8,6 +8,7 @@ import {
   TOGGLE_MUTE,
   SET_ACTIVE_SONG,
   SET_PLAYING,
+  SET_SHOW_QUEUE,
 } from './playerActionTypes';
 import {
   pausePlayer,
@@ -182,3 +183,8 @@ export function toggleMute() {
     type: TOGGLE_MUTE,
   };
 }
+
+export const setShowQueue = (value) => ({
+  type: SET_SHOW_QUEUE,
+  payload: value,
+});

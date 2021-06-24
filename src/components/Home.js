@@ -192,7 +192,11 @@ const Home = ({
           </Button>
         </div>
         <div
-          style={expandedView ? { visibility: 'hidden' } : {}}
+          style={
+            expandedView || player.showQueue
+              ? { visibility: 'hidden', maxHeight: 0 }
+              : {}
+          }
           className={classes.songsList}
         >
           <AutoSizer>
@@ -228,6 +232,7 @@ Home.propTypes = {
   player: PropTypes.shape({
     activeSongId: PropTypes.string,
     playing: PropTypes.bool,
+    showQueue: PropTypes.bool.isRequired,
   }).isRequired,
   addSongs: PropTypes.func.isRequired,
   addSongsToQueue: PropTypes.func.isRequired,

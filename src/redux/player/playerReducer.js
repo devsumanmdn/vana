@@ -9,6 +9,7 @@ import {
   TOGGLE_MUTE,
   SET_ACTIVE_SONG,
   SET_PLAYING,
+  SET_SHOW_QUEUE,
 } from './playerActionTypes';
 
 const initialState = {
@@ -19,6 +20,7 @@ const initialState = {
   playedDuration: 0,
   volume: 80,
   isMute: false,
+  showQueue: false,
 };
 
 const playerReducer = (state = initialState, action) => {
@@ -50,6 +52,11 @@ const playerReducer = (state = initialState, action) => {
       return {
         ...state,
         playing: payload,
+      };
+    case SET_SHOW_QUEUE:
+      return {
+        ...state,
+        showQueue: payload,
       };
     case SET_TOTAL_DURATION:
       return {

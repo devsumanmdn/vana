@@ -12,9 +12,11 @@ import VolumeDown from '@material-ui/icons/VolumeDown';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import VolumeMute from '@material-ui/icons/VolumeMute';
+import { Icon, List } from '@material-ui/core';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import moment from 'moment';
 import momentDurationFormatSetup from 'moment-duration-format';
+import AutoSizer from 'react-virtualized-auto-sizer';
 // import momentDurationFormatSetup from 'moment-duration-format';
 import { connect } from 'react-redux';
 
@@ -25,6 +27,7 @@ import {
   playNextSong as playNextSongAction,
   playPrevSong as playPrevSongAction,
   prepareSong as prepareSongAction,
+  setShowQueue as setShowQueueAction,
   // setTotalDuration as setTotalDurationAction
 } from '../redux/player/playerActions';
 import {
@@ -33,6 +36,7 @@ import {
 } from '../redux/playerMiddleware/playerMiddleWareActions';
 import parseFile from '../util/parseFile';
 import { settingsPropType } from '../redux/settings/settingsReducer';
+import PlayingQueueList from './PlayingQueueList';
 
 momentDurationFormatSetup(moment);
 
@@ -48,8 +52,7 @@ const useStyle = makeStyles({
     transitionDuration: '1s',
     justifyContent: 'space-evenly',
     overflow: 'hidden',
-    marginTop: '55px',
-    marginBottom: '-55px',
+    position: 'relative',
 
     '&.hidden': {
       minHeight: 0,
@@ -63,18 +66,24 @@ const useStyle = makeStyles({
     },
 
     '&.expandedView': {
-      height: 'calc(100% - 55px)',
+      height: '100%',
       width: '100%',
       padding: '10px 20px',
       top: 0,
       left: 0,
       maxHeight: 'unset',
       flexDirection: 'column',
-      position: 'fixed',
-      WebkitAppRegion: 'drag',
+      position: 'relative',
 
-      '& > *': {
-        WebkitAppRegion: 'no-drag',
+      '& $nowPlayingContainer': {
+        height: '100%',
+      },
+
+      '& $albumArtContainer': {
+        height: '100%',
+        width: '100%',
+        flexDirection: 'column',
+        position: 'relative',
       },
 
       '& $albumArt': {
@@ -87,6 +96,15 @@ const useStyle = makeStyles({
 
       '& $volumeContainer': {
         // display: 'none'
+      },
+
+      '& hideControls': {
+        marginBottom: -50,
+        opacity: 0,
+        transitionDuration: '1s',
+        justifyContent: 'space-evenly',
+        overflow: 'hidden',
+        position: 'relative',
       },
 
       '& $songInfo': {
@@ -108,8 +126,31 @@ const useStyle = makeStyles({
         flexGrow: 'unset',
         alignSelf: 'stretch',
       },
+
+      '&.showingQueue': {
+        '& $nowPlayingContainer': {
+          height: '100%',
+          display: 'flex',
+        },
+
+        '& $albumArtContainer': {
+          width: '50%',
+        },
+      },
     },
   },
+
+  nowPlayingContainer: {
+    width: '100%',
+    transitionDuration: '0.4s',
+  },
+
+  albumArtContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+  },
+
   backgroundContainer: ({ transparentMode }) => ({
     position: 'fixed',
     zIndex: -999999,
@@ -158,11 +199,6 @@ const useStyle = makeStyles({
     display: 'flex',
     margin: '20px 10px',
     transitionDuration: '0.3s',
-
-    '&.hideControls': {
-      marginBottom: -50,
-      opacity: 0,
-    },
   },
   playBtn: {
     backgroundColor: 'transparent',
@@ -274,6 +310,8 @@ const Player = ({
   resumeSong,
   setPlayerVolume,
   prepareSong,
+  setShowQueue,
+  player,
 }) => {
   const classes = useStyle(settings);
   const [songInfo, setSongInfo] = useState(null);
@@ -384,10 +422,19 @@ const Player = ({
     return <VolumeOff />;
   };
 
+  const handleExpandedViewToggle = () => {
+    if (expandedView) {
+      setShowQueue(false);
+    }
+
+    setExpandedView(!expandedView);
+  };
+
   return (
     <div
       className={clsx(classes.root, {
-        expandedView,
+        expandedView: expandedView || player.showQueue,
+        showingQueue: player.showQueue,
         hidden: !activeSong,
         hideControls: controlsTimeout,
       })}
@@ -411,103 +458,136 @@ const Player = ({
         />
       </div>
       {activeSong ? (
-        <>
-          {songInfo ? (
+        <div className={classes.nowPlayingContainer}>
+          <div className={classes.albumArtContainer}>
+            {songInfo ? (
+              <div
+                role="presentation"
+                onClick={handleExpandedViewToggle}
+                className={classes.albumArt}
+                style={{ backgroundImage: `url(${albumArtDataURL}` }}
+                alt="albumArt"
+              />
+            ) : (
+              <div
+                role="presentation"
+                onClick={handleExpandedViewToggle}
+                className={classes.albumArt}
+                style={{ background: '#000' }}
+              />
+            )}
             <div
-              role="presentation"
-              onClick={() => setExpandedView(!expandedView)}
-              className={classes.albumArt}
-              style={{ backgroundImage: `url(${albumArtDataURL}` }}
-              alt="albumArt"
-            />
-          ) : (
+              className={clsx(classes.songNavigation, {
+                hideControls: controlsTimeout,
+              })}
+            >
+              <button
+                type="button"
+                onClick={playPrevSong}
+                className={classes.playBtn}
+              >
+                <PlayPreviousIcon />
+              </button>
+              <button
+                type="button"
+                onClick={handlePlayPause}
+                className={clsx(classes.playBtn, 'playPause')}
+              >
+                {playing ? <PauseIcon /> : <PlayIcon />}
+              </button>
+              <button
+                type="button"
+                onClick={playNextSong}
+                className={classes.playBtn}
+              >
+                <PlayNextIcon />
+              </button>
+            </div>
             <div
-              role="presentation"
-              onClick={() => setExpandedView(!expandedView)}
-              className={classes.albumArt}
-              style={{ background: '#000' }}
-            />
-          )}
-          <div
-            className={clsx(classes.songNavigation, {
-              hideControls: controlsTimeout,
-            })}
-          >
-            <button
-              type="button"
-              onClick={playPrevSong}
-              className={classes.playBtn}
+              className={clsx(classes.infoContainer, {
+                hideControls: controlsTimeout,
+              })}
             >
-              <PlayPreviousIcon />
-            </button>
-            <button
-              type="button"
-              onClick={handlePlayPause}
-              className={clsx(classes.playBtn, 'playPause')}
-            >
-              {playing ? <PauseIcon /> : <PlayIcon />}
-            </button>
-            <button
-              type="button"
-              onClick={playNextSong}
-              className={classes.playBtn}
-            >
-              <PlayNextIcon />
-            </button>
-          </div>
-          <div
-            className={clsx(classes.infoContainer, {
-              hideControls: controlsTimeout,
-            })}
-          >
-            <div>
-              {songInfo ? (
-                <div className={classes.songInfo}>
-                  <p>{songInfo.common.title}</p>
-                  <div className={classes.separator} />
-                  <p>{songInfo.common.artists}</p>
+              <div>
+                {songInfo ? (
+                  <div className={classes.songInfo}>
+                    <p>{songInfo.common.title}</p>
+                    <div className={classes.separator} />
+                    <p>{songInfo.common.artists}</p>
+                  </div>
+                ) : null}
+                <div className={classes.volumeContainer}>
+                  <Tooltip
+                    interactive
+                    classes={{ tooltip: classes.tooltip }}
+                    title={
+                      <Slider
+                        classes={{ root: classes.volumeSlider }}
+                        orientation="vertical"
+                        value={volume * 100}
+                        onChange={handleVolumeChange}
+                        aria-labelledby="continuous-slider"
+                      />
+                    }
+                  >
+                    <Button onClick={() => {}} aria-label="Volumne control">
+                      {getVolumeIcon()}
+                    </Button>
+                  </Tooltip>
+                  <Button
+                    onClick={() => setShowQueue(!player.showQueue)}
+                    aria-label="open playing queue"
+                  >
+                    <Icon>queue_music</Icon>
+                  </Button>
                 </div>
-              ) : null}
-              <div className={classes.volumeContainer}>
-                <Tooltip
-                  interactive
-                  classes={{ tooltip: classes.tooltip }}
-                  title={
-                    <Slider
-                      classes={{ root: classes.volumeSlider }}
-                      orientation="vertical"
-                      value={volume * 100}
-                      onChange={handleVolumeChange}
-                      aria-labelledby="continuous-slider"
-                    />
-                  }
-                >
-                  <Button onClick={() => {}}>{getVolumeIcon()}</Button>
-                </Tooltip>
+              </div>
+              <div className={classes.songPlaybackProgress}>
+                <span>
+                  {moment.duration(playedDuration, 'seconds').format('mm:ss', {
+                    trim: false,
+                  })}
+                </span>
+                <Slider
+                  classes={{ root: classes.progressSlider }}
+                  value={(playedDuration / totalDuration) * 100}
+                  aria-labelledby="continuous-slider"
+                  onChange={handleSeek}
+                  onChangeCommitted={() => resumeSong()}
+                />
+                <span>
+                  {moment.duration(totalDuration, 'seconds').format('mm:ss', {
+                    trim: false,
+                  })}
+                </span>
               </div>
             </div>
-            <div className={classes.songPlaybackProgress}>
-              <span>
-                {moment.duration(playedDuration, 'seconds').format('mm:ss', {
-                  trim: false,
-                })}
-              </span>
-              <Slider
-                classes={{ root: classes.progressSlider }}
-                value={(playedDuration / totalDuration) * 100}
-                aria-labelledby="continuous-slider"
-                onChange={handleSeek}
-                onChangeCommitted={() => resumeSong()}
-              />
-              <span>
-                {moment.duration(totalDuration, 'seconds').format('mm:ss', {
-                  trim: false,
-                })}
-              </span>
-            </div>
           </div>
-        </>
+          {player.showQueue ? <PlayingQueueList /> : null}
+        </div>
       ) : null}
+      <div
+        style={
+          expandedView || player.showQueue
+            ? { visibility: 'hidden', maxHeight: 0 }
+            : {}
+        }
+        className={classes.songsList}
+      >
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              height={height}
+              itemCount={Object.keys([]).length}
+              itemData={Object.values([])}
+              itemSize={80}
+              width={width}
+            >
+              {}
+            </List>
+          )}
+        </AutoSizer>
+      </div>
     </div>
   );
 };
@@ -526,6 +606,9 @@ Player.propTypes = {
     location: PropTypes.string,
     albumArt: PropTypes.string,
   }),
+  player: PropTypes.shape({
+    showQueue: PropTypes.bool.isRequired,
+  }).isRequired,
   expandedView: PropTypes.bool.isRequired,
   setExpandedView: PropTypes.func.isRequired,
   // playSong: PropTypes.func.isRequired,
@@ -537,13 +620,14 @@ Player.propTypes = {
   setPlayerVolume: PropTypes.func.isRequired,
   prepareSong: PropTypes.func.isRequired,
   settings: settingsPropType.isRequired,
+  setShowQueue: PropTypes.func.isRequired,
 };
 
 Player.defaultProps = {
   activeSong: null,
 };
 
-const mapStateToProps = ({ settings }) => ({ settings });
+const mapStateToProps = ({ settings, player }) => ({ settings, player });
 
 const mapDispatchToProps = {
   playSong: playSongAction,
@@ -554,6 +638,7 @@ const mapDispatchToProps = {
   seek: seekPlayer,
   setPlayerVolume: setPlayerVolumeAction,
   prepareSong: prepareSongAction,
+  setShowQueue: setShowQueueAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Player);
