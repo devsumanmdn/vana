@@ -25,7 +25,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "vana_2"
+            "name": "vana"
           }
         },
         {
