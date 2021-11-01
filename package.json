@@ -1,6 +1,6 @@
 {
-  "name": "vana-2",
-  "productName": "vana-2",
+  "name": "vana",
+  "productName": "vana",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
