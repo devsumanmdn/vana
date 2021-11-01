@@ -1,0 +1,14 @@
+"use strict";
+exports.__esModule = true;
+exports.SET_SHOW_QUEUE = exports.SET_PLAYING = exports.TOGGLE_MUTE = exports.SET_VOLUME = exports.SET_PLAYED_DURATION = exports.SET_TOTAL_DURATION = exports.SET_ACTIVE_SONG = exports.REMOVE_SONGS_FROM_QUEUE = exports.CLEAR_QUEUE = exports.ADD_SONGS_TO_QUEUE = void 0;
+exports.ADD_SONGS_TO_QUEUE = 'ADD_SONGS_TO_QUEUE';
+exports.CLEAR_QUEUE = 'CLEAR_QUEUE';
+exports.REMOVE_SONGS_FROM_QUEUE = 'REMOVE_SONGS_FROM_QUEUE';
+exports.SET_ACTIVE_SONG = 'SET_ACTIVE_SONG';
+exports.SET_TOTAL_DURATION = 'SET_TOTAL_DURATION';
+exports.SET_PLAYED_DURATION = 'SET_PLAYED_DURATION';
+exports.SET_VOLUME = 'SET_VOLUME';
+exports.TOGGLE_MUTE = 'TOGGLE_MUTE';
+exports.SET_PLAYING = 'SET_PLAYING';
+exports.SET_SHOW_QUEUE = 'SET_SHOW_QUEUE';
+//# sourceMappingURL=playerActionTypes.js.map
