@@ -1,39 +1,29 @@
-const rules = require('./webpack.rules');
+const webpack = require("webpack");
+const rules = require("./webpack.rules");
+const plugins = require("./webpack.plugins");
 
-rules.push(
-  {
-    test: /\.css$/,
-    use: [{ loader: 'style-loader' }, { loader: 'css-loader' }]
-  },
-  {
-    test: /\.js$/,
-    exclude: /node_modules/,
-    loader: 'babel-loader'
-  },
-  {
-    test: /\.(png|jpe?g|gif)$/i,
-    use: [
-      {
-        loader: 'file-loader'
-      }
-    ]
-  }
-);
+rules.push({
+  test: /\.css$/,
+  use: [{ loader: "style-loader" }, { loader: "css-loader" }],
+});
+
+// plugins.push(
+//   new webpack.DefinePlugin({
+//     "process.type": "browser",
+//     browser: "renderer",
+//   })
+// );
 
 module.exports = {
-  // Put your normal webpack config below here
   module: {
-    rules
+    rules,
   },
-  devServer: {
-    contentBase: './src/'
-  }
-  // externals: [
-  //   {
-  //     electron: "require('electron')",
-  //     child_process: "require('child_process')",
-  //     fs: "require('fs')",
-  //     path: "require('path')"
-  //   }
-  // ]
+  plugins,
+  resolve: {
+    extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
+    fallback: {
+      path: false,
+      fs: false,
+    },
+  },
 };
