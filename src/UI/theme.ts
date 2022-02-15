@@ -1,6 +1,6 @@
 import ArrowDropDownRounded from "@mui/icons-material/ArrowDropDownRounded";
-import { BadgeUnstyledTypeMap } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
+import { BadgeProps } from "@mui/material";
 
 declare module "@mui/material/styles/createPalette" {
   interface ColorRange {
@@ -48,7 +48,7 @@ declare module "@mui/material/styles/createTheme" {
   }
 
   interface propOptions {
-    MuiBadge: BadgeUnstyledTypeMap["props"];
+    MuiBadge: BadgeProps;
   }
 
   interface ThemeOptions {
