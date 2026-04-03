@@ -11,4 +11,9 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json']
   },
+  // music-metadata is ESM + conditional exports; webpack 5 resolves it to a missing stub.
+  // Load it from node_modules at runtime (Electron main has Node require).
+  externals: {
+    "music-metadata": "commonjs2 music-metadata",
+  },
 };

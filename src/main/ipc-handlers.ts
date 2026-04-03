@@ -7,8 +7,12 @@ import type { MusicMetadataForUi } from "../shared/music-metadata";
 
 const AUDIO_EXT = new Set(["mp3", "flac", "ogg", "webm"]);
 
+/** Inline SVG so album art works under strict CSP (no https img-src required). */
 const FALLBACK_ALBUM_ART =
-  "https://42f2671d685f51e10fc6-b9fcecea3e50b3b59bdc28dead054ebc.ssl.cf5.rackcdn.com/illustrations/compose_music_ovo2.svg";
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#6b7280"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>'
+  );
 
 function walkAudioFiles(dir: string, filelist: string[] = []): string[] {
   const files = fs.readdirSync(dir);
@@ -30,7 +34,7 @@ function walkAudioFiles(dir: string, filelist: string[] = []): string[] {
 function buildMusicMetadata(location: string, parsedData: IAudioMetadata): MusicMetadataForUi {
   const picture = parsedData.common.picture?.[0];
   const albumArt = picture
-    ? `data:image/jpeg;base64,${picture.data.toString("base64")}`
+    ? `data:image/jpeg;base64,${Buffer.from(picture.data).toString("base64")}`
     : FALLBACK_ALBUM_ART;
 
   const commonSansPicture = { ...parsedData.common };

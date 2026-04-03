@@ -41,7 +41,7 @@ export default ({ dispatch }) => (next) => {
 
   setTimeout(() => {
     initiateAnalyser(player);
-  }, 0);
+  }, 10);
 
   return (action) => {
     const { type, payload } = action;

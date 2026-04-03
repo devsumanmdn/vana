@@ -88,7 +88,6 @@ function SongListItem({ metaData, playing, playSong, pauseSong, ...rest }: any) 
         {playing ? <PauseRounded /> : <PlayArrowRounded />}
       </button>
       <p>{songInfo.common.title}</p>
-      <audio src={metaData.location} />
     </div>
   ) : (
     <div className={classes.root} {...rest} />

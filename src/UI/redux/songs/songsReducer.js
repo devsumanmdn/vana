@@ -12,6 +12,9 @@ const initialState = {
 
 export default function counter(state = initialState, action) {
   const { payload, type } = action;
+  console.log("payload", payload);
+  console.log("type", type);
+  console.log("state", state);
   switch (type) {
     case ADD_SONGS:
       return {
