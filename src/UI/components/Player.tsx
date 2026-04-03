@@ -302,7 +302,7 @@ const useStyle = makeStyles({
 });
 
 const Player = ({
-  activeSong,
+  activeSong = null,
   playerState,
   pauseSong,
   playNextSong,
@@ -623,10 +623,6 @@ Player.propTypes = {
   prepareSong: PropTypes.func.isRequired,
   settings: settingsPropType.isRequired,
   setShowQueue: PropTypes.func.isRequired,
-};
-
-Player.defaultProps = {
-  activeSong: null,
 };
 
 const mapStateToProps = ({ settings, player }) => ({ settings, player });

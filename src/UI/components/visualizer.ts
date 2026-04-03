@@ -28,7 +28,7 @@ function renderFrame({
 
   x = 0;
 
-  analyser.getByteFrequencyData(dataArray);
+  analyser.getByteFrequencyData(dataArray as Uint8Array<ArrayBuffer>);
   if (ctx.clearRect) {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
   }

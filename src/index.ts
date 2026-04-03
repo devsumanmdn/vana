@@ -5,9 +5,7 @@ import { app, BrowserWindow } from "electron";
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
-import { initialize, enable } from "@electron/remote/main";
-initialize();
-
+import { registerIpcHandlers } from "./main/ipc-handlers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -29,11 +27,11 @@ const createWindow = (): void => {
     transparent: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      devTools: isDev
+      devTools: isDev,
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
-
-  enable(mainWindow.webContents)
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
@@ -42,10 +40,11 @@ const createWindow = (): void => {
   mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+// Electron 41+: prefer whenReady() over the legacy "ready" event.
+void app.whenReady().then(() => {
+  registerIpcHandlers();
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

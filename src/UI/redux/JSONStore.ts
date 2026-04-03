@@ -1,28 +1,37 @@
 class JSONStore {
-  path: string;
-  data: any;
-  constructor({ fileName, defaultData = {} }: { fileName: string, defaultData?: any }) {
-    this.path = window.electron.getFilePath(fileName);
-    this.data = window.electron.parseDataFile(this.path, defaultData);
+  path!: string;
+  data: unknown;
+
+  private constructor() {}
+
+  static async create({
+    fileName,
+    defaultData = {},
+  }: {
+    fileName: string;
+    defaultData?: unknown;
+  }): Promise<JSONStore> {
+    const inst = new JSONStore();
+    inst.path = await window.electron.getFilePath(fileName);
+    inst.data = await window.electron.parseDataFile(inst.path, defaultData);
+    return inst;
   }
 
-  get(key?: string): any {
+  get(key?: string): unknown {
     if (key) {
-      return this.data[key];
+      return (this.data as Record<string, unknown>)[key];
     }
     return this.data;
   }
 
-  set(key, val): void {
+  async set(key: unknown, val: unknown): Promise<void> {
     if (key) {
-      this.data[key] = val;
+      (this.data as Record<string, unknown>)[key as string] = val as unknown;
     } else {
       this.data = val;
     }
-
-    window.electron.writeFile(this.path, JSON.stringify(this.data));
+    await window.electron.writeFile(this.path, JSON.stringify(this.data));
   }
 }
 
-// expose the class
 export default JSONStore;
